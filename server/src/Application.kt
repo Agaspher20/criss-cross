@@ -73,8 +73,7 @@ fun Application.module() {
             }
 
             val gson = Gson()
-            val allGames = gameServer.getAllGames().toList()
-            val gamesJson = gson.toJson(allGames.map{ v -> gson.toJson(v) })
+            val gamesJson = gson.toJson(gameServer.getAllGames().toList())
             send(Frame.Text("games|$gamesJson"))
 
             send(Frame.Text("info|initialized"))

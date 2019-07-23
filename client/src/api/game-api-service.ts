@@ -20,9 +20,5 @@ export function submitGame(name: string): Promise<number> {
 }
 
 export function fetchGames(): Promise<ReadonlyArray<GameItem>> {
-    return listenFirst(Channels.Games).then(gamesString => {
-        const gamesArrray: string[] = JSON.parse(gamesString);
-
-        return gamesArrray.map(game => JSON.parse(game));
-    });
+    return listenFirst(Channels.Games).then(gamesString => JSON.parse(gamesString));
 }
