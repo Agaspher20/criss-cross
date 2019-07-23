@@ -1,5 +1,6 @@
 package com.crissCrossServer
 
+import com.google.gson.Gson
 import io.ktor.http.cio.websocket.Frame
 import io.ktor.http.cio.websocket.WebSocketSession
 
@@ -21,6 +22,19 @@ class GameRouter(
                         val gameName = command.removePrefix("create|")
                         val game = this.server.createGame(gameName)
                         this.wsSession.send(Frame.Text("game|${game.id}"))
+                    }
+                    command.startsWith("load|") -> {
+                        val idString = command.removePrefix("load|")
+
+                        try {
+                            val id = idString.toInt()
+                            val game = this.server.getGameDetails(id)
+
+                            val gson = Gson()
+                            this.wsSession.send(Frame.Text("game|${gson.toJson(game)}"))
+                        } catch (exc: NumberFormatException) {
+                            this.wsSession.send(Frame.Text("game|"))
+                        }
                     }
                 }
             }

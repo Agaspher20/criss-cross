@@ -1,5 +1,5 @@
 import { Action, Store } from "redux";
-import { GameModel, GameItem } from "../model/game.model";
+import { GameModel, GameItem, GameDtoModel } from "../model/game.model";
 
 export type StoreActions =
     | "SET_USER_NAME"
@@ -7,6 +7,9 @@ export type StoreActions =
     | "ADD_GAME"
     | "SAVING_GAME"
     | "SET_GAMES"
+    | "LOADING_GAME"
+    | "SET_GAME"
+    | "SET_GAME_NOT_FOUND"
     | "MOVE_GAME";
 
 interface StoreActionsValueInterface {
@@ -15,6 +18,9 @@ interface StoreActionsValueInterface {
     readonly AddGame: StoreActions;
     readonly SavingGame: StoreActions;
     readonly SetGames: StoreActions;
+    readonly LoadingGame: StoreActions;
+    readonly SetGame: StoreActions;
+    readonly SetGameNotFound: StoreActions;
     readonly MoveGame: StoreActions;
 }
 
@@ -24,6 +30,9 @@ export const StoreActionsValue: StoreActionsValueInterface = {
     AddGame: "ADD_GAME",
     SavingGame: "SAVING_GAME",
     SetGames: "SET_GAMES",
+    LoadingGame: "LOADING_GAME",
+    SetGame: "SET_GAME",
+    SetGameNotFound: "SET_GAME_NOT_FOUND",
     MoveGame: "MOVE_GAME",
 };
 
@@ -44,6 +53,17 @@ export interface SavingGameAction extends Action<StoreActions> {
 export interface SetGamesAction extends Action<StoreActions> {
     readonly games: ReadonlyArray<GameItem>;
 }
+
+export interface LoadingGameAction extends Action<StoreActions> {
+    readonly id: number;
+    readonly name?: string;
+}
+
+export interface SetGameAction extends Action<StoreActions> {
+    readonly gameDto: GameDtoModel;
+}
+
+export interface SetGameNotFoundAction extends Action<StoreActions> {}
 
 export interface MoveGameAction extends Action<StoreActions> {
     readonly cellIndex: number;
@@ -67,6 +87,18 @@ export function setGames(games: ReadonlyArray<GameItem>): SetGamesAction {
 
 export function savingGame(saving: boolean): SavingGameAction {
     return { type: StoreActionsValue.SavingGame, saving };
+}
+
+export function loadingGame(id: number, name?: string): LoadingGameAction {
+    return { type: StoreActionsValue.LoadingGame, id, name };
+}
+
+export function setGame(gameDto: GameDtoModel): SetGameAction {
+    return { type: StoreActionsValue.SetGame, gameDto };
+}
+
+export function setGameNotFound(): SetGameNotFoundAction {
+    return { type: StoreActionsValue.SetGameNotFound };
 }
 
 export function moveGame(cellIndex: number): MoveGameAction {

@@ -3,19 +3,18 @@ import { BoardComponent } from "./board.component";
 import { GameModel } from "../model/game.model";
 
 export interface GameProps {
-    name: string;
     model?: GameModel;
     onMove?: (index: number) => void
 }
 
 export class GameComponent extends React.Component<GameProps> {
     public render(): React.ReactElement {
-        const model = this.props.model;
-        const handleMove = this.props.onMove;
+        const model = this.props.model!;
+        const handleMove = this.props.onMove!;
 
-        if (!model || !handleMove) {
+        if (!model.exists || !handleMove) {
             return (<div className="game">
-                <p>Game with name "{this.props.name}" was not found.</p>
+                <p>Game with name "{model.name}" was not found.</p>
             </div>);
         }
 
@@ -24,7 +23,7 @@ export class GameComponent extends React.Component<GameProps> {
         return (
             <div className="game">
                 <div className="game-board">
-                    <div>{this.props.name}</div>
+                    <div>{model.name}</div>
                     <div className="status">{status}</div>
                     <BoardComponent sideSize={model.sideSize}
                            cells={model.cells}
@@ -38,10 +37,10 @@ export class GameComponent extends React.Component<GameProps> {
         );
     }
 
-    private getStatus({ winner, stepsCount, nextSymbol, sideSize }: GameModel): string {
+    private getStatus({ winnerName, winnerSymbol, stepsCount, nextSymbol, sideSize }: GameModel): string {
         const maxStepsCount = sideSize * sideSize;
-        return winner
-            ? `The winner is: ${winner}`
+        return winnerSymbol
+            ? `The winner is: ${winnerName || winnerSymbol}`
             : stepsCount < maxStepsCount
                 ? `Next player: ${nextSymbol}`
                 : "Game over";

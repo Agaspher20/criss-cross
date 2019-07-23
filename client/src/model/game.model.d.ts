@@ -2,8 +2,20 @@ export interface GameModel extends GameItem, GameParameters {
     readonly stepsCount: number;
     readonly nextSymbol: CellSymbols;
     readonly cells: ReadonlyArray<CellValues>;
-    readonly winner?: CellSymbols;
+    readonly winnerSymbol?: CellSymbols;
+    readonly winnerName?: string;
     readonly exists: boolean;
+    readonly loading: boolean;
+    readonly lastMoveId?: string;
+}
+
+export interface GameDtoModel {
+    readonly stepsCount: number;
+    readonly nextSymbol: CellSymbols;
+    readonly lastMoveId?: string;
+    readonly winnerSymbol?: CellSymbols;
+    readonly winnerName?: string;
+    readonly cells: ReadonlyArray<[number, CellSymbols]>;
 }
 
 export interface GameItem {

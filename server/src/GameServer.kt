@@ -1,15 +1,24 @@
 package com.crissCrossServer
 
+import kotlin.Pair
 import java.util.concurrent.ConcurrentHashMap
 import java.util.*
+import kotlin.collections.ArrayList
 
 data class Game(val id: Int, val name: String)
+data class GameDetails(
+    val stepsCount: Int,
+    val nextSymbol: String,
+    val cells: ArrayList<Pair<Int, String>>,
+    val lastMoveId: String? = null,
+    val winnerSymbol: String? = null)
 
 class GameServer {
     private val usersDictionary = ConcurrentHashMap<String, String>()
 
     private var lastGameId = 0
     private val gamesDictionary = ConcurrentHashMap<Int, Game>()
+    private val gameDetailsDictionary = ConcurrentHashMap<Int, GameDetails>()
 
     fun setUserName(session: GameSession, userName: String) {
         usersDictionary[session.id] = userName
@@ -29,5 +38,14 @@ class GameServer {
         gamesDictionary[id] = game
 
         return game
+    }
+
+    fun getGameDetails(id: Int): GameDetails {
+        return gameDetailsDictionary.getOrPut(id, {
+            GameDetails(
+                0,
+                "X",
+                ArrayList<Pair<Int, String>>(0))
+        })
     }
 }

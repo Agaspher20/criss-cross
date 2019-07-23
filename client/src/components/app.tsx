@@ -1,10 +1,9 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
-import { UserNameInputContainer } from "../containers/user-name-input.container";
 import { UserNameContainer } from "../containers/user-name.container";
-import { GameNameInputContainer } from "../containers/game-name-input.container";
 import { GameListContainer } from "../containers/game-list.container";
 import { GameRouteComponent } from "./game-route.component";
+import { GameRouteContainer } from "../containers/game-route.container";
 
 export class App extends React.Component {
     public render(): React.ReactElement {
@@ -22,7 +21,7 @@ export class App extends React.Component {
                 </div>
                 <hr />
                 <Route exact path="/" component={GameListContainer}/>
-                <Route path="/game/:name" component={GameRouteComponent}/>
+                <Route path="/game/:id" component={GameRouteContainer}/>
             </Router>
         </div>)
     }

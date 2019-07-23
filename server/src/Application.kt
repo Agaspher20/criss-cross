@@ -76,7 +76,7 @@ fun Application.module() {
             val gamesJson = gson.toJson(gameServer.getAllGames().toList())
             send(Frame.Text("games|$gamesJson"))
 
-            send(Frame.Text("info|initialized"))
+            send(Frame.Text("info|${session.id}"))
             incoming.consumeEach { frame ->
                 if (frame is Frame.Text) {
                     gameRouter.routeFrame(frame.readText())
