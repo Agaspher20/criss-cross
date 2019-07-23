@@ -1,7 +1,6 @@
 import React from "react";
 import { GameItem } from "../model/game.model";
 import { Link } from "react-router-dom";
-import { UserNameInputContainer } from "../containers/user-name-input.container";
 import { GameNameInputContainer } from "../containers/game-name-input.container";
 import { GameListModel } from "../model/game-list.model";
 
@@ -21,7 +20,7 @@ export class GameListComponent extends React.Component<GameListModel> {
         return <ul>{ (this.props.games || []).map(game => this.renderGameItem(game)) }</ul>;
     }
 
-    private renderGameItem({ name }: GameItem): React.ReactElement {
-        return (<li key={name}><Link to={`/game/${name}`}>{name}</Link></li>);
+    private renderGameItem({ id, name }: GameItem): React.ReactElement {
+        return (<li key={id}><Link to={`/game/${id}`}>{name}</Link></li>);
     }
 }
