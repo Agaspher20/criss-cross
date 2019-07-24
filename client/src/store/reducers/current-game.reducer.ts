@@ -2,7 +2,6 @@ import { Action } from "redux";
 import { GameModel, GameParameters } from "../../model/game.model";
 import {
     StoreActions,
-    StoreActionsValue,
     MoveGameAction,
     LoadingGameAction,
     SetGameAction,
@@ -31,13 +30,13 @@ export function currentGame(
     action: Action<StoreActions>
 ): GameModel {
     switch (action.type) {
-        case StoreActionsValue.MoveGame:
+        case StoreActions.MoveGame:
             return moveGame(state, action as MoveGameAction);
-        case StoreActionsValue.LoadingGame:
+        case StoreActions.LoadingGame:
             return loadingGame(state, action as LoadingGameAction);
-        case StoreActionsValue.SetGame:
+        case StoreActions.SetGame:
             return setGame(state, action as SetGameAction);
-        case StoreActionsValue.SetGameNotFound:
+        case StoreActions.SetGameNotFound:
             return setGameNotFound(state, action as SetGameNotFoundAction);
         default:
             return state;

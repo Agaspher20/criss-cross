@@ -1,5 +1,5 @@
 import { Action } from "redux";
-import { StoreActions, StoreActionsValue, AddGameAction, SetGamesAction } from "../actions";
+import { StoreActions, AddGameAction, SetGamesAction } from "../actions";
 import { GameListModel } from "../../model/game-list.model";
 
 const defaultGameList: GameListModel = {
@@ -13,9 +13,9 @@ export function games(
     action: Action<StoreActions>
 ): GameListModel {
     switch (action.type) {
-        case StoreActionsValue.AddGame:
+        case StoreActions.AddGame:
             return addGame(state, action as AddGameAction);
-        case StoreActionsValue.SetGames:
+        case StoreActions.SetGames:
             return setGames(state, action as SetGamesAction);
         default:
             return state;

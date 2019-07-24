@@ -1,5 +1,5 @@
 import { Action } from "redux";
-import { StoreActions, StoreActionsValue, SetUserNameAction, SetUserAction } from "../actions";
+import { StoreActions, SetUserNameAction, SetUserAction } from "../actions";
 import { UserStateModel } from "../../model/user.model";
 
 const defaultUserModel: UserStateModel = {
@@ -10,11 +10,11 @@ const defaultUserModel: UserStateModel = {
 
 export function user(state: UserStateModel = defaultUserModel, action: Action<StoreActions>): UserStateModel {
     switch (action.type) {
-        case StoreActionsValue.SetUser:
+        case StoreActions.SetUser:
             return setUser(state, action as SetUserAction);
-        case StoreActionsValue.SetUserName:
+        case StoreActions.SetUserName:
             return setUserName(state, action as SetUserNameAction);
-        case StoreActionsValue.SavingUserName:
+        case StoreActions.SavingUserName:
             return savingUserName(state);
         default:
             return state;
