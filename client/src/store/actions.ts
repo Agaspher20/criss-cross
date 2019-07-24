@@ -1,7 +1,9 @@
-import { Action, Store } from "redux";
-import { GameModel, GameItem, GameDtoModel } from "../model/game.model";
+import { Action } from "redux";
+import { GameItem, GameDtoModel } from "../model/game.model";
+import { UserModel } from "../model/user.model";
 
 export type StoreActions =
+    | "SET_USER"
     | "SET_USER_NAME"
     | "SAVING_USER_NAME"
     | "ADD_GAME"
@@ -13,6 +15,7 @@ export type StoreActions =
     | "MOVE_GAME";
 
 interface StoreActionsValueInterface {
+    readonly SetUser: StoreActions;
     readonly SetUserName: StoreActions;
     readonly SavingUserName: StoreActions;
     readonly AddGame: StoreActions;
@@ -25,6 +28,7 @@ interface StoreActionsValueInterface {
 }
 
 export const StoreActionsValue: StoreActionsValueInterface = {
+    SetUser: "SET_USER",
     SetUserName: "SET_USER_NAME",
     SavingUserName: "SAVING_USER_NAME",
     AddGame: "ADD_GAME",
@@ -35,6 +39,10 @@ export const StoreActionsValue: StoreActionsValueInterface = {
     SetGameNotFound: "SET_GAME_NOT_FOUND",
     MoveGame: "MOVE_GAME",
 };
+
+export interface SetUserAction extends Action<StoreActions> {
+    readonly user: UserModel;
+}
 
 export interface SetUserNameAction extends Action<StoreActions> {
     readonly name: string;
@@ -67,6 +75,10 @@ export interface SetGameNotFoundAction extends Action<StoreActions> {}
 
 export interface MoveGameAction extends Action<StoreActions> {
     readonly cellIndex: number;
+}
+
+export function setUser(user: UserModel): SetUserAction {
+    return { type: StoreActionsValue.SetUser, user };
 }
 
 export function setUserName(name: string): SetUserNameAction {

@@ -12,6 +12,7 @@ data class GameDetails(
     val cells: ArrayList<Pair<Int, String>>,
     val lastMoveId: String? = null,
     val winnerSymbol: String? = null)
+data class User(val id: String, val name: String?)
 
 class GameServer {
     private val usersDictionary = ConcurrentHashMap<String, String>()
@@ -24,7 +25,9 @@ class GameServer {
         usersDictionary[session.id] = userName
     }
 
-    fun getUserName(session: GameSession): String? = usersDictionary[session.id]
+    fun getUser(session: GameSession): User {
+        return User(session.id, usersDictionary[session.id])
+    }
 
     fun getAllGames(): Enumeration<Game> {
         return gamesDictionary.elements()

@@ -62,21 +62,21 @@ fun Application.module() {
         }
 
         webSocket("/ws/game") {
+            val gson = Gson()
             val session = call.sessions.get<GameSession>()!!
             val gameRouter = GameRouter(gameServer, session, this)
-            val userName = gameServer.getUserName(session)
+            val user = gameServer.getUser(session)
 
-            if (userName != null) {
-                send(Frame.Text("user|$userName"))
+            if (user != null) {
+                send(Frame.Text("user|${gson.toJson(user)}"))
             } else {
                 send(Frame.Text("user|"))
             }
 
-            val gson = Gson()
             val gamesJson = gson.toJson(gameServer.getAllGames().toList())
             send(Frame.Text("games|$gamesJson"))
 
-            send(Frame.Text("info|${session.id}"))
+            send(Frame.Text("initialized|${session.id}"))
             incoming.consumeEach { frame ->
                 if (frame is Frame.Text) {
                     gameRouter.routeFrame(frame.readText())

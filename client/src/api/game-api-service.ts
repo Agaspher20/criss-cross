@@ -1,5 +1,6 @@
 import { requestResponse, listenFirst } from "./game.api";
 import { GameItem, GameDtoModel } from "../model/game.model";
+import { UserModel } from "../model/user.model";
 
 enum Channels {
     User = "user",
@@ -11,8 +12,9 @@ export function submitUserName(name: string): Promise<string> {
     return requestResponse(Channels.User, name);
 }
 
-export function fetchUserName(): Promise<string> {
-    return listenFirst(Channels.User);
+export async function fetchUser(): Promise<UserModel> {
+    const userString = await listenFirst(Channels.User);
+    return JSON.parse(userString);
 }
 
 export async function submitGame(name: string): Promise<number> {
