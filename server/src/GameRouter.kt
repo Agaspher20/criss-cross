@@ -30,8 +30,13 @@ class GameRouter(
                             val id = idString.toInt()
                             val game = this.server.getGameDetails(id)
 
-                            val gson = Gson()
-                            this.wsSession.send(Frame.Text("game|${gson.toJson(game)}"))
+                            val gameText = if (game == null ) {
+                                ""
+                            } else {
+                                val gson = Gson()
+                                gson.toJson(game)
+                            }
+                            this.wsSession.send(Frame.Text("game|$gameText"))
                         } catch (exc: NumberFormatException) {
                             this.wsSession.send(Frame.Text("game|"))
                         }

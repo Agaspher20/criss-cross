@@ -40,7 +40,11 @@ class GameServer {
         return game
     }
 
-    fun getGameDetails(id: Int): GameDetails {
+    fun getGameDetails(id: Int): GameDetails? {
+        if (!gamesDictionary.containsKey(id)) {
+            return null
+        }
+
         return gameDetailsDictionary.getOrPut(id, {
             GameDetails(
                 0,
