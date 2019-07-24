@@ -1,6 +1,7 @@
 package com.crissCrossServer
 
 import com.google.gson.Gson
+import com.google.gson.JsonSyntaxException
 import io.ktor.http.cio.websocket.Frame
 import io.ktor.http.cio.websocket.WebSocketSession
 
@@ -39,6 +40,17 @@ class GameRouter(
                             this.wsSession.send(Frame.Text("game|$gameText"))
                         } catch (exc: NumberFormatException) {
                             this.wsSession.send(Frame.Text("game|"))
+                        }
+                    }
+                    command.startsWith("move|") -> {
+                        val moveText = command.removePrefix("move|")
+                        val gson = Gson()
+
+                        try {
+                            val move = gson.fromJson<GameMove>(moveText, GameMove::class.java)
+                            server.moveGame(move)
+                        } catch (exc: JsonSyntaxException) {
+                            // skip move
                         }
                     }
                 }

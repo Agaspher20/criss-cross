@@ -1,33 +1,35 @@
 import React from "react";
 import { BoardComponent } from "./board.component";
-import { GameModel } from "../model/game.model";
+import { GameModel, GameMove } from "../model/game.model";
 
 export interface GameProps {
     model?: GameModel;
-    onMove?: (index: number) => void
+    userId?: string;
+    onMove?: (move: GameMove) => void
 }
 
 export class GameComponent extends React.Component<GameProps> {
-    public render(): React.ReactElement {
-        const model = this.props.model!;
-        const handleMove = this.props.onMove!;
+    private get model(): GameModel {
+        return this.props.model!;
+    }
 
-        if (!model.exists || !handleMove) {
+    public render(): React.ReactElement {
+        if (!this.model.exists) {
             return (<div className="game">
-                <p>Game with name "{model.name}" was not found.</p>
+                <p>Game with name "{this.model.name}" was not found.</p>
             </div>);
         }
 
-        const status = this.getStatus(model);
+        const status = this.getStatus();
         
         return (
             <div className="game">
                 <div className="game-board">
-                    <div>{model.name}</div>
+                    <div>{this.model.name}</div>
                     <div className="status">{status}</div>
-                    <BoardComponent sideSize={model.sideSize}
-                           cells={model.cells}
-                           onMove={index => handleMove(index)} />
+                    <BoardComponent sideSize={this.model.sideSize}
+                           cells={this.model.cells}
+                           onMove={index => this.handleMove(index)} />
                 </div>
                 <div className="game-info">
                     <div>{/* status */}</div>
@@ -37,7 +39,8 @@ export class GameComponent extends React.Component<GameProps> {
         );
     }
 
-    private getStatus({ winnerName, winnerSymbol, stepsCount, nextSymbol, sideSize }: GameModel): string {
+    private getStatus(): string {
+        const { winnerName, winnerSymbol, stepsCount, nextSymbol, sideSize } = this.model;
         const maxStepsCount = sideSize * sideSize;
         return winnerSymbol
             ? `The winner is: ${winnerName || winnerSymbol}`
@@ -45,4 +48,19 @@ export class GameComponent extends React.Component<GameProps> {
                 ? `Next player: ${nextSymbol}`
                 : "Game over";
     }
+
+    private handleMove(cellIndex: number): void {
+        if (this.props.onMove && canSetSymbol(cellIndex, this.model)) {
+            this.props.onMove({
+                gameId: this.model.id,
+                cellIndex,
+                symbol: this.model.nextSymbol,
+                userId: this.props.userId!
+            });
+        }
+    }
+}
+
+function canSetSymbol(i: number, model: GameModel): boolean {
+    return !model.cells[i] && !model.winnerSymbol;
 }

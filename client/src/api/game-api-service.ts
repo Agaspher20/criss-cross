@@ -1,5 +1,5 @@
-import { requestResponse, listenFirst } from "./game.api";
-import { GameItem, GameDtoModel } from "../model/game.model";
+import { requestResponse, listenFirst, sendData } from "./game.api";
+import { GameItem, GameDtoModel, GameMove } from "../model/game.model";
 import { UserModel } from "../model/user.model";
 
 enum Channels {
@@ -34,6 +34,10 @@ export async function fetchGame(id: number): Promise<GameDtoModel> {
         throw new GameNotFoundError();
     }
     return JSON.parse(gameString);
+}
+
+export function submitMove(move: GameMove): Promise<void> {
+    return sendData(Channels.Game, `move|${JSON.stringify(move)}`);
 }
 
 export class GameNotFoundError extends Error {}

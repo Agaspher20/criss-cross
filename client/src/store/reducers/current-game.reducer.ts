@@ -5,7 +5,7 @@ import {
     MoveGameAction,
     LoadingGameAction,
     SetGameAction,
-    SetGameNotFoundAction,
+    SetLastMoveIdAction
 } from "../actions";
 import { calculateWinner } from "../../helpers/calculate-winner.helper";
 
@@ -30,6 +30,8 @@ export function currentGame(
     action: Action<StoreActions>
 ): GameModel {
     switch (action.type) {
+        case StoreActions.SetLastMoveId:
+            return setLastMoveId(state, action as SetLastMoveIdAction);
         case StoreActions.MoveGame:
             return moveGame(state, action as MoveGameAction);
         case StoreActions.LoadingGame:
@@ -37,25 +39,25 @@ export function currentGame(
         case StoreActions.SetGame:
             return setGame(state, action as SetGameAction);
         case StoreActions.SetGameNotFound:
-            return setGameNotFound(state, action as SetGameNotFoundAction);
+            return setGameNotFound(state);
         default:
             return state;
     }
 }
 
 function setGame(
-    state: GameModel,
+    game: GameModel,
     { gameDto }: SetGameAction
 ): GameModel {
-    const { stepsCount, nextSymbol, lastMoveId, winnerSymbol, winnerName, cells } = gameDto;
+    const { stepsCount, nextSymbol, lastMoveId, winnerSymbol, winnerName, moves } = gameDto;
     const cellsArray = new Array(parameters.sideSize * parameters.sideSize);
 
-    for(const [index, symbol] of cells) {
-        cellsArray[index] = symbol;
+    for(const { cellIndex, symbol } of moves) {
+        cellsArray[cellIndex] = symbol;
     }
 
     return {
-        ...state,
+        ...game,
         stepsCount,
         nextSymbol,
         cells: cellsArray,
@@ -68,11 +70,10 @@ function setGame(
 }
 
 function setGameNotFound(
-    state: GameModel,
-    action: SetGameNotFoundAction
+    game: GameModel
 ): GameModel {
     return {
-        ...state,
+        ...game,
         exists: false,
         loading: false,
     };
@@ -94,10 +95,6 @@ function moveGame(
     game: GameModel,
     { cellIndex }: MoveGameAction
 ): GameModel {
-    if (!canSetSymbol(cellIndex, game)) {
-        return game;
-    }
-        
     const currentSymbol = game.nextSymbol;
     const cells = [...game.cells];        
     cells[cellIndex] = currentSymbol;
@@ -111,6 +108,12 @@ function moveGame(
     };
 }
 
-function canSetSymbol(i: number, model: GameModel): boolean {
-    return !model.cells[i] && !model.winnerSymbol;
+function setLastMoveId(
+    game: GameModel,
+    { lastMoveId }: SetLastMoveIdAction
+): GameModel {
+    return {
+        ...game,
+        lastMoveId
+    };
 }

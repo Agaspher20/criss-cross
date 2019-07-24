@@ -12,43 +12,48 @@ export enum StoreActions {
     LoadingGame = "LOADING_GAME",
     SetGame = "SET_GAME",
     SetGameNotFound = "SET_GAME_NOT_FOUND",
+    SetLastMoveId = "SET_LAST_MOVE_ID",
     MoveGame = "MOVE_GAME",
 }
 
-export interface SetUserAction extends Action<StoreActions> {
+export interface SetUserAction extends Action<StoreActions.SetUser> {
     readonly user: UserModel;
 }
 
-export interface SetUserNameAction extends Action<StoreActions> {
+export interface SetUserNameAction extends Action<StoreActions.SetUserName> {
     readonly name: string;
 }
 
-export interface SavingUserNameAction extends Action<StoreActions> {}
+export interface SavingUserNameAction extends Action<StoreActions.SavingUserName> {}
 
-export interface AddGameAction extends Action<StoreActions> {
+export interface AddGameAction extends Action<StoreActions.AddGame> {
     readonly game: GameItem;
 }
 
-export interface SavingGameAction extends Action<StoreActions> {
+export interface SavingGameAction extends Action<StoreActions.SavingGame> {
     readonly saving: boolean;
 }
 
-export interface SetGamesAction extends Action<StoreActions> {
+export interface SetGamesAction extends Action<StoreActions.SetGames> {
     readonly games: ReadonlyArray<GameItem>;
 }
 
-export interface LoadingGameAction extends Action<StoreActions> {
+export interface LoadingGameAction extends Action<StoreActions.LoadingGame> {
     readonly id: number;
     readonly name?: string;
 }
 
-export interface SetGameAction extends Action<StoreActions> {
+export interface SetGameAction extends Action<StoreActions.SetGame> {
     readonly gameDto: GameDtoModel;
 }
 
-export interface SetGameNotFoundAction extends Action<StoreActions> {}
+export interface SetGameNotFoundAction extends Action<StoreActions.SetGameNotFound> {}
 
-export interface MoveGameAction extends Action<StoreActions> {
+export interface SetLastMoveIdAction extends Action<StoreActions.SetLastMoveId> {
+    readonly lastMoveId: string;
+}
+
+export interface MoveGameAction extends Action<StoreActions.MoveGame> {
     readonly cellIndex: number;
 }
 
@@ -86,6 +91,10 @@ export function setGame(gameDto: GameDtoModel): SetGameAction {
 
 export function setGameNotFound(): SetGameNotFoundAction {
     return { type: StoreActions.SetGameNotFound };
+}
+
+export function setLastMoveId(lastMoveId: string): SetLastMoveIdAction {
+    return { type: StoreActions.SetLastMoveId, lastMoveId };
 }
 
 export function moveGame(cellIndex: number): MoveGameAction {

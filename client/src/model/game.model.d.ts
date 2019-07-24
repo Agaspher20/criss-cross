@@ -15,7 +15,7 @@ export interface GameDtoModel {
     readonly lastMoveId?: string;
     readonly winnerSymbol?: CellSymbols;
     readonly winnerName?: string;
-    readonly cells: ReadonlyArray<[number, CellSymbols]>;
+    readonly moves: ReadonlyArray<StoredGameMove>;
 }
 
 export interface GameItem {
@@ -26,6 +26,16 @@ export interface GameItem {
 export interface GameParameters {
     readonly sideSize: number;
     readonly symbolsToWin: number;
+}
+
+export interface GameMove extends StoredGameMove {
+    readonly gameId: number;
+}
+
+export interface StoredGameMove {
+    readonly userId: string;
+    readonly cellIndex: number;
+    readonly symbol: CellSymbols;
 }
 
 export type CellSymbols = "X" | "O";

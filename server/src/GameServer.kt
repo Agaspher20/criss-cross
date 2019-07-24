@@ -9,9 +9,20 @@ data class Game(val id: Int, val name: String)
 data class GameDetails(
     val stepsCount: Int,
     val nextSymbol: String,
-    val cells: ArrayList<Pair<Int, String>>,
+    val moves: ArrayList<StoredGameMove>,
     val lastMoveId: String? = null,
     val winnerSymbol: String? = null)
+data class GameMove(
+    val gameId: Int,
+    val userId: String,
+    val cellIndex: Int,
+    val symbol: String
+)
+data class StoredGameMove(
+    val userName: String,
+    val cellIndex: Int,
+    val symbol: String
+)
 data class User(val id: String, val name: String?)
 
 class GameServer {
@@ -43,16 +54,27 @@ class GameServer {
         return game
     }
 
-    fun getGameDetails(id: Int): GameDetails? {
-        if (!gamesDictionary.containsKey(id)) {
-            return null
-        }
-
-        return gameDetailsDictionary.getOrPut(id, {
+    fun getGameDetails(id: Int): GameDetails? = if (!gamesDictionary.containsKey(id)) {
+        null
+    } else {
+        gameDetailsDictionary.getOrPut(id, {
             GameDetails(
                 0,
                 "X",
-                ArrayList<Pair<Int, String>>(0))
+                ArrayList(0))
         })
+    }
+
+    fun moveGame(move: GameMove): StoredGameMove? {
+        val gameDetails = getGameDetails(move.gameId)
+
+        if (gameDetails == null) {
+            return null
+        }
+
+        val storedMove = StoredGameMove(usersDictionary.getOrDefault(move.userId, "<Anonymous>"), move.cellIndex, move.symbol)
+        gameDetails.moves.add(storedMove)
+
+        return storedMove
     }
 }
