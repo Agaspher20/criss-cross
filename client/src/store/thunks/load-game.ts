@@ -2,7 +2,7 @@ import { Dispatch } from "redux";
 import { loadingGame, setGame, setGameNotFound } from "../actions";
 import { fetchGame, GameNotFoundError } from "../../api/game-api-service";
 
-export function loadGameThunk(
+export function loadGame(
     dispatch: Dispatch
 ): (id: number, name?: string) => Promise<void> {
     return async (id: number, name?: string) => {

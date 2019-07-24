@@ -1,7 +1,7 @@
 import { Dispatch } from "redux";
 import { connect } from "react-redux";
 import { NameInputProps, NameInputComponent } from "../components/name-input.component";
-import { submitUserNameThunk } from "../store/thunks/submit-user-name";
+import { saveUserName } from "../store/thunks/save-user-name";
 import { CrissCrossState } from "../store/criss-cross.store";
 
 function mapStateToProps({ user }: CrissCrossState, ownProps: NameInputProps): NameInputProps {
@@ -14,7 +14,7 @@ function mapStateToProps({ user }: CrissCrossState, ownProps: NameInputProps): N
 function mapDispatchToProps(dispatch: Dispatch, ownProps: NameInputProps): NameInputProps {
     return {
         ...ownProps,
-        onSubmit: submitUserNameThunk(dispatch),
+        onSubmit: saveUserName(dispatch),
     };
 }
 
