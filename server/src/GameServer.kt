@@ -1,6 +1,6 @@
 package com.crissCrossServer
 
-import kotlin.Pair
+import io.ktor.http.cio.websocket.WebSocketSession
 import java.util.concurrent.ConcurrentHashMap
 import java.util.*
 import kotlin.collections.ArrayList
@@ -31,6 +31,7 @@ class GameServer {
     private var lastGameId = 0
     private val gamesDictionary = ConcurrentHashMap<Int, Game>()
     private val gameDetailsDictionary = ConcurrentHashMap<Int, GameDetails>()
+    private val gamesMovesSubscriptionsDictionary = ConcurrentHashMap<Int, ArrayList<WebSocketSession>>()
 
     fun setUserName(session: GameSession, userName: String) {
         usersDictionary[session.id] = userName
@@ -65,7 +66,7 @@ class GameServer {
         })
     }
 
-    fun moveGame(move: GameMove): StoredGameMove? {
+    fun moveGame(move: GameMove): GameMove? {
         val gameDetails = getGameDetails(move.gameId)
 
         if (gameDetails == null) {
@@ -75,6 +76,15 @@ class GameServer {
         val storedMove = StoredGameMove(usersDictionary.getOrDefault(move.userId, "<Anonymous>"), move.cellIndex, move.symbol)
         gameDetails.moves.add(storedMove)
 
-        return storedMove
+        return move
+    }
+
+    fun subscribeGame(gameId: Int, session: WebSocketSession) {
+        val subscribers = gamesMovesSubscriptionsDictionary.getOrPut(gameId, { ArrayList() })
+        subscribers.add(session)
+    }
+
+    fun getSubscribers(gameId: Int): ArrayList<WebSocketSession> {
+        return gamesMovesSubscriptionsDictionary.getOrPut(gameId, { ArrayList() })
     }
 }

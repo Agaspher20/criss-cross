@@ -1,7 +1,6 @@
 import React from "react";
 import { RouteComponentProps } from "react-router";
 import { GameContainer } from "../containers/game.container";
-import { GameItem } from "../model/game.model";
 
 export interface GameRouteParams {
     readonly id: string;

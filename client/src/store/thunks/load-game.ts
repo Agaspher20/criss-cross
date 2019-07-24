@@ -1,6 +1,6 @@
 import { Dispatch } from "redux";
-import { loadingGame, setGame, setGameNotFound } from "../actions";
-import { fetchGame, GameNotFoundError } from "../../api/game-api-service";
+import { loadingGame, setGame, setGameNotFound, moveGame } from "../actions";
+import { fetchGame, GameNotFoundError, subscribeGame } from "../../api/game-api-service";
 
 export function loadGame(
     dispatch: Dispatch
@@ -10,6 +10,10 @@ export function loadGame(
         try {
             const gameDto = await fetchGame(id);
             dispatch(setGame(gameDto));
+
+            subscribeGame(id, move => {
+                dispatch(moveGame(move.cellIndex));
+            });
         } catch (error) {
             if (error instanceof GameNotFoundError) {
                 dispatch(setGameNotFound());

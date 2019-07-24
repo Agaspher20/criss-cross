@@ -6,6 +6,19 @@ enum Channels {
     User = "user",
     Game = "game",
     Games = "games",
+    Subscribe = "subscribe",
+}
+
+export function subscribeGame(gameId: number, callback: (move: GameMove) => void): void {
+    listenChannel(Channels.Game, data => {
+        if (data.startsWith("move|")) {
+            const parsedMove: GameMove = JSON.parse(data.replace("move|", ""));
+            if (parsedMove.gameId === gameId) {
+                callback(parsedMove);
+            }
+        }
+    });
+    sendData(Channels.Subscribe, `game|${gameId}`);
 }
 
 export function submitUserName(name: string): Promise<string> {

@@ -9,7 +9,7 @@ class GameRouter(
         private val server: GameServer,
         private val gameSession: GameSession,
         private val wsSession: WebSocketSession) {
-    public suspend fun routeFrame(frameText: String): Unit {
+    public suspend fun routeFrame(frameText: String) {
         when {
             frameText.startsWith("user|") -> {
                 val userName = frameText.removePrefix("user|")
@@ -52,10 +52,30 @@ class GameRouter(
                         val gson = Gson()
 
                         try {
-                            val move = gson.fromJson<GameMove>(moveText, GameMove::class.java)
-                            server.moveGame(move)
+                            val move = gson.fromJson(moveText, GameMove::class.java)
+                            val submittedMove = server.moveGame(move)
+
+                            if (submittedMove != null) {
+                                server.getSubscribers(move.gameId).forEach { session ->
+                                    session.send(Frame.Text("game|move|$moveText"))
+                                }
+                            }
                         } catch (exc: JsonSyntaxException) {
                             // skip move
+                        }
+                    }
+                }
+            }
+            frameText.startsWith("subscribe|") -> {
+                val command = frameText.removePrefix("subscribe|")
+                when {
+                    command.startsWith("game|") -> {
+                        val gameIdString = command.removePrefix("game|")
+                        try {
+                            val gameId = gameIdString.toInt()
+                            server.subscribeGame(gameId, this.wsSession)
+                        } catch (exc: NumberFormatException) {
+                            // do not add subscription
                         }
                     }
                 }
