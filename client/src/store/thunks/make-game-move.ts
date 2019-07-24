@@ -8,7 +8,7 @@ export function makeGameMove(
 ): (move: GameMove) => Promise<void> {
     return async (move: GameMove) => {
         dispatch(setLastMoveId(move.userId));
-        submitMove(move);
         dispatch(moveGame(move.cellIndex));
+        submitMove(move);
     };
 }

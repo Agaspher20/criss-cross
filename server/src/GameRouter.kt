@@ -16,14 +16,19 @@ class GameRouter(
                 this.server.setUserName(this.gameSession, userName)
                 this.wsSession.send(Frame.Text("user|$userName"))
             }
-            frameText.startsWith("game|") -> {
-                val command = frameText.removePrefix("game|")
+            frameText.startsWith("games|") -> {
+                val command = frameText.removePrefix("games|")
                 when {
                     command.startsWith("create|") -> {
                         val gameName = command.removePrefix("create|")
                         val game = this.server.createGame(gameName)
-                        this.wsSession.send(Frame.Text("game|${game.id}"))
+                        this.wsSession.send(Frame.Text("games|${game.id}"))
                     }
+                }
+            }
+            frameText.startsWith("game|") -> {
+                val command = frameText.removePrefix("game|")
+                when {
                     command.startsWith("load|") -> {
                         val idString = command.removePrefix("load|")
 

@@ -1,4 +1,4 @@
-import { requestResponse, listenFirst, sendData } from "./game.api";
+import { requestResponse, listenFirst, sendData, listenChannel } from "./game.api";
 import { GameItem, GameDtoModel, GameMove } from "../model/game.model";
 import { UserModel } from "../model/user.model";
 
@@ -18,7 +18,7 @@ export async function fetchUser(): Promise<UserModel> {
 }
 
 export async function submitGame(name: string): Promise<number> {
-    const id = await requestResponse(Channels.Game, `create|${name}`);
+    const id = await requestResponse(Channels.Games, `create|${name}`);
     return parseInt(id, 10);
 }
 
