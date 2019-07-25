@@ -12,7 +12,13 @@ const webSocketAddress = `ws://${window.location.host}/ws/game`;
 const listeners = new Map<string, Set<ChannelCallback>>();
 const connectionStateListeners = new Set<ConnectionCallback<ConnectionStates>>();
 
+let connected = true;
 let webSocketPromise: Promise<WebSocket>;
+
+window.onbeforeunload = () => {
+    connected = false;
+    webSocketPromise.then(ws => ws.close());
+}
 
 function createWebSocket(): Promise<WebSocket> {
     return new Promise(resolve => {
@@ -28,7 +34,9 @@ function createWebSocket(): Promise<WebSocket> {
         webSocket.onmessage = onMessage;
         webSocket.onclose = () => {
             notifyListeners(ConnectionStates.Disconnected, connectionStateListeners);
-            webSocketPromise = createWebSocket();
+            if (connected) {
+                webSocketPromise = createWebSocket();
+            }
         }
     });
 }
