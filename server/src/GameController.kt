@@ -6,36 +6,40 @@ import io.ktor.http.cio.websocket.Frame
 import io.ktor.http.cio.websocket.WebSocketSession
 
 class GameController(
-    private val gameServer: GameServer,
+    private val gameStorage: GameStorage,
     private val userSession: UserSession,
     private val wsSession: WebSocketSession
 ) {
     private val gson = Gson()
 
     suspend fun initializeSession() {
-        val user = this.gameServer.getUser(this.userSession.id)
+        val user = this.gameStorage.getUser(this.userSession.id)
 
         this.sendToChannel("user", gson.toJson(user))
 
-        val gamesJson = gson.toJson(gameServer.getAllGames().toList())
+        val gamesJson = gson.toJson(gameStorage.getAllGames().toList())
         this.sendToChannel("games", gamesJson)
         this.sendToChannel("initialized", this.userSession.id)
     }
 
+    fun disposeSession() {
+        this.gameStorage.memberLeft(this.wsSession)
+    }
+
     suspend fun setUserName(userName: String) {
-        this.gameServer.setUserName(userSession.id, userName)
+        this.gameStorage.setUserName(userSession.id, userName)
         this.sendToChannel("user", userName)
     }
 
     suspend fun createGame(gameName: String) {
-        val game = this.gameServer.createGame(gameName)
+        val game = this.gameStorage.createGame(gameName)
         this.sendToChannel("games", game.id.toString())
     }
 
     suspend fun loadGame(idString: String) {
         try {
             val id = idString.toInt()
-            val game = this.gameServer.getGameDetails(id)
+            val game = this.gameStorage.getGameDetails(id)
 
             val gameText = if (game == null ) {
                 ""
@@ -51,10 +55,10 @@ class GameController(
     suspend fun gameMove(moveText: String) {
         try {
             val move = this.gson.fromJson(moveText, GameMove::class.java)
-            val submittedMove = gameServer.moveGame(move)
+            val submittedMove = gameStorage.moveGame(move)
 
             if (submittedMove != null) {
-                val subscribers = gameServer.getSubscribers(move.gameId)
+                val subscribers = gameStorage.getSubscribers(move.gameId)
                 subscribers.forEach { session ->
                     session.send(Frame.Text("game|move|$moveText"))
                 }
@@ -67,7 +71,7 @@ class GameController(
     fun subscribeToGame(gameIdString: String) {
         try {
             val gameId = gameIdString.toInt()
-            gameServer.subscribeGame(gameId, this.wsSession)
+            gameStorage.subscribeGame(gameId, this.wsSession)
         } catch (exc: NumberFormatException) {
             println("Game id parsing failed on subscribe")
         }
@@ -76,7 +80,7 @@ class GameController(
     fun unsubscribeFromGame(gameIdString: String) {
         try {
             val gameId = gameIdString.toInt()
-            gameServer.unsubscribeGame(gameId, this.wsSession)
+            gameStorage.unsubscribeGame(gameId, this.wsSession)
         } catch (exc: NumberFormatException) {
             println("Game id parsing failed on unsubscribe")
         }

@@ -21,7 +21,7 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 @UseExperimental(ObsoleteCoroutinesApi::class)
 @Suppress("unused") // Referenced in application.conf
 fun Application.module() {
-    val gameServer = GameServer()
+    val gameStorage = GameStorage()
 
     install(Sessions) {
         cookie<UserSession>("SESSION") {
@@ -62,7 +62,7 @@ fun Application.module() {
 
         webSocket("/ws/game") {
             val session = call.sessions.get<UserSession>()!!
-            val gameController = GameController(gameServer, session, this)
+            val gameController = GameController(gameStorage, session, this)
             val gameRouter = GameRouter(gameController)
 
             gameController.initializeSession()
@@ -73,7 +73,7 @@ fun Application.module() {
                     }
                 }
             } finally {
-                gameServer.memberLeft(this)
+                gameController.disposeSession()
             }
         }
 

@@ -5,26 +5,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.*
 import kotlin.collections.ArrayList
 
-data class Game(val id: Int, val name: String)
-data class GameDetails(
-    val nextSymbol: String,
-    val moves: ArrayList<StoredGameMove>,
-    val lastMoveId: String? = null,
-    val winnerSymbol: String? = null)
-data class GameMove(
-    val gameId: Int,
-    val userId: String,
-    val cellIndex: Int,
-    val symbol: String
-)
-data class StoredGameMove(
-    val userName: String,
-    val cellIndex: Int,
-    val symbol: String
-)
-data class User(val id: String, val name: String?)
-
-class GameServer {
+class GameStorage {
     private val usersDictionary = ConcurrentHashMap<String, String>()
 
     private var lastGameId = 0
@@ -75,7 +56,7 @@ class GameServer {
 
         val storedMove = StoredGameMove(usersDictionary.getOrDefault(move.userId, "<Anonymous>"), move.cellIndex, move.symbol)
         gameDetails.moves.add(storedMove)
-        gameDetailsDictionary[move.gameId] = GameDetails(if (move.symbol == "X") "O" else "X", gameDetails.moves, move.userId)
+        gameDetails.nextSymbol = if (move.symbol == "X") "O" else "X"
 
         return move
     }
