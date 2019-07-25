@@ -10,7 +10,7 @@ class GameStorage {
 
     private var lastGameId = 0
     private val gamesDictionary = ConcurrentHashMap<Int, Game>()
-    private val gameDetailsDictionary = ConcurrentHashMap<Int, GameDetails>()
+    private val gameDetailsDictionary = ConcurrentHashMap<Int, StoredGameDetails>()
     private val gamesMovesSubscriptionsDictionary = ConcurrentHashMap<Int, ConcurrentHashMap<WebSocketSession, WebSocketSession>>()
     private val webSocketToGameDictionary = ConcurrentHashMap<WebSocketSession, Int>()
 
@@ -36,29 +36,15 @@ class GameStorage {
         return game
     }
 
-    fun getGameDetails(id: Int): GameDetails? = if (!gamesDictionary.containsKey(id)) {
+    fun getGameDetails(id: Int): StoredGameDetails? = if (!gamesDictionary.containsKey(id)) {
         null
     } else {
         gameDetailsDictionary.getOrPut(id, {
-            GameDetails(
+            StoredGameDetails(
                 "X",
-                ArrayList()
+                ConcurrentHashMap()
             )
         })
-    }
-
-    fun moveGame(move: GameMove): GameMove? {
-        val gameDetails = getGameDetails(move.gameId)
-
-        if (gameDetails == null) {
-            return null
-        }
-
-        val storedMove = StoredGameMove(usersDictionary.getOrDefault(move.userId, "<Anonymous>"), move.cellIndex, move.symbol)
-        gameDetails.moves.add(storedMove)
-        gameDetails.nextSymbol = if (move.symbol == "X") "O" else "X"
-
-        return move
     }
 
     fun subscribeGame(gameId: Int, session: WebSocketSession) {

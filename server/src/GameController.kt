@@ -11,6 +11,7 @@ class GameController(
     private val wsSession: WebSocketSession
 ) {
     private val gson = Gson()
+    private val gameService = GameService()
 
     suspend fun initializeSession() {
         val user = this.gameStorage.getUser(this.userSession.id)
@@ -39,11 +40,16 @@ class GameController(
     suspend fun loadGame(idString: String) {
         try {
             val id = idString.toInt()
-            val game = this.gameStorage.getGameDetails(id)
+            val storedGame = this.gameStorage.getGameDetails(id)
 
-            val gameText = if (game == null ) {
+            val gameText = if (storedGame == null ) {
                 ""
             } else {
+                val game = GameDetails(
+                    storedGame.nextSymbol,
+                    storedGame.moves.values.toList(),
+                    storedGame.lastMoveId,
+                    storedGame.winnerSymbol)
                 this.gson.toJson(game)
             }
             this.sendToChannel("game", gameText)
@@ -55,7 +61,8 @@ class GameController(
     suspend fun gameMove(moveText: String) {
         try {
             val move = this.gson.fromJson(moveText, GameMove::class.java)
-            val submittedMove = gameStorage.moveGame(move)
+            val gameDetails = this.gameStorage.getGameDetails(move.gameId)
+            val submittedMove = gameService.moveGame(move, gameDetails)
 
             if (submittedMove != null) {
                 val subscribers = gameStorage.getSubscribers(move.gameId)
