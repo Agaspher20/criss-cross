@@ -1,4 +1,4 @@
-import { requestResponse, listenFirst, sendData, listenChannel } from "./game.api";
+import { requestResponse, listenFirst, sendData, listenChannel, ChannelCallback, stopListenChannel } from "./game.api";
 import { GameItem, GameDtoModel, GameMove } from "../model/game.model";
 import { UserModel } from "../model/user.model";
 
@@ -8,16 +8,49 @@ enum Channels {
     Games = "games",
 }
 
-export function subscribeGame(gameId: number, callback: (move: GameMove) => void): void {
-    listenChannel(Channels.Game, data => {
+type GameMoveCallback = (move: GameMove) => void;
+
+const gameListeners: {
+    [key: number]: ChannelCallback | undefined
+} = {};
+
+function createGameListener (
+    gameId: number,
+    callback: GameMoveCallback
+): ChannelCallback {
+    return data => {
         if (data.startsWith("move|")) {
             const parsedMove: GameMove = JSON.parse(data.replace("move|", ""));
             if (parsedMove.gameId === gameId) {
                 callback(parsedMove);
             }
         }
-    });
+    };
+}
+
+function stopGameListener(gameId: number) {
+    const listener = gameListeners[gameId];
+    if (listener) {
+        stopListenChannel(Channels.Game, listener);
+        gameListeners[gameId] = undefined;
+    }
+}
+
+function setGameListener(gameId: number, listener: ChannelCallback): void {
+    stopGameListener(gameId);
+    gameListeners[gameId] = listener;
+}
+
+export function subscribeGame(gameId: number, callback: GameMoveCallback): void {
+    const listener = createGameListener(gameId, callback);
+    setGameListener(gameId, listener);
+    listenChannel(Channels.Game, listener);
     sendData(Channels.Game, `subscribe|${gameId}`);
+}
+
+export function unsubscribeGame(gameId: number): void {
+    stopGameListener(gameId);
+    sendData(Channels.Game, `unsubscribe|${gameId}`);
 }
 
 export function submitUserName(name: string): Promise<string> {

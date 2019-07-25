@@ -8,8 +8,10 @@ export enum ConnectionStates {
     Error = "Error"
 }
 
+type ChannelListeners = { [key: string]: Set<ChannelCallback> };
+
 const webSocketAddress = `ws://${window.location.host}/ws/game`;
-const listeners = new Map<string, Set<ChannelCallback>>();
+const listeners: ChannelListeners = {};
 const connectionStateListeners = new Set<ConnectionCallback<ConnectionStates>>();
 
 let connected = true;
@@ -52,7 +54,7 @@ function onMessage(event: MessageEvent): void {
     if (delimiterIndex > 0) {
         const channel = stringData.substring(0, delimiterIndex);
         
-        const channelListeners = listeners.get(channel);
+        const channelListeners = listeners[channel];
         if (channelListeners) {
             const payload = stringData.substring(delimiterIndex + 1);
             notifyListeners(payload, channelListeners);
@@ -93,11 +95,11 @@ export function listenChannel(channel: string, callback: ChannelCallback): void 
         return;
     }
 
-    let channelListeners = listeners.get(channel);
+    let channelListeners = listeners[channel];
 
     if (!channelListeners) {
         channelListeners = new Set<ChannelCallback>();
-        listeners.set(channel, channelListeners);
+        listeners[channel] = channelListeners;
     }
     
     channelListeners.add(callback);
@@ -121,7 +123,7 @@ export function stopListenState(callback: ConnectionCallback<ConnectionStates>):
 }
 
 export function stopListenChannel(channel: string, callback: ChannelCallback) {
-    let channelListeners = listeners.get(channel);
+    let channelListeners = listeners[channel];
 
     if (!channelListeners) {
         return;

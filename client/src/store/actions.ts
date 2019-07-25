@@ -11,6 +11,7 @@ export enum StoreActions {
     SetGames = "SET_GAMES",
     LoadingGame = "LOADING_GAME",
     SetGame = "SET_GAME",
+    SetDefaultGame = "SET_DEFAULT_GAME",
     SetGameNotFound = "SET_GAME_NOT_FOUND",
     SetLastMoveId = "SET_LAST_MOVE_ID",
     MoveGame = "MOVE_GAME",
@@ -47,6 +48,8 @@ export interface LoadingGameAction extends Action<StoreActions.LoadingGame> {
 export interface SetGameAction extends Action<StoreActions.SetGame> {
     readonly gameDto: GameDtoModel;
 }
+
+export interface SetDefaultGameAction extends Action<StoreActions.SetDefaultGame> {}
 
 export interface SetGameNotFoundAction extends Action<StoreActions.SetGameNotFound> {}
 
@@ -90,6 +93,10 @@ export function loadingGame(id: number, name?: string): LoadingGameAction {
 
 export function setGame(gameDto: GameDtoModel): SetGameAction {
     return { type: StoreActions.SetGame, gameDto };
+}
+
+export function setDefaultGame(): SetDefaultGameAction {
+    return { type: StoreActions.SetDefaultGame };
 }
 
 export function setGameNotFound(): SetGameNotFoundAction {

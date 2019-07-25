@@ -62,7 +62,8 @@ class GameServer {
             GameDetails(
                 0,
                 "X",
-                ArrayList(0))
+                ArrayList()
+            )
         })
     }
 

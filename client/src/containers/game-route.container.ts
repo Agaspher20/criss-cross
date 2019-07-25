@@ -3,6 +3,7 @@ import { CrissCrossState } from "../store/criss-cross.store";
 import { GameRouteProps, GameRouteComponent } from "../components/game-route.component";
 import { Dispatch } from "redux";
 import { loadGame } from "../store/thunks/load-game";
+import { unloadGame } from "../store/thunks/unload-game";
 
 function mapStateToProps(
     { games }: CrissCrossState,
@@ -20,7 +21,8 @@ function mapStateToProps(
 function mapDispatchToProps(dispatch: Dispatch, ownProps: GameRouteProps): GameRouteProps {
     return {
         ...ownProps,
-        onLoad: loadGame(dispatch)
+        onLoad: loadGame(dispatch),
+        onUnload: unloadGame(dispatch),
     };
 }
 
