@@ -7,7 +7,6 @@ import kotlin.collections.ArrayList
 
 data class Game(val id: Int, val name: String)
 data class GameDetails(
-    val stepsCount: Int,
     val nextSymbol: String,
     val moves: ArrayList<StoredGameMove>,
     val lastMoveId: String? = null,
@@ -60,7 +59,6 @@ class GameServer {
     } else {
         gameDetailsDictionary.getOrPut(id, {
             GameDetails(
-                0,
                 "X",
                 ArrayList()
             )
@@ -76,6 +74,7 @@ class GameServer {
 
         val storedMove = StoredGameMove(usersDictionary.getOrDefault(move.userId, "<Anonymous>"), move.cellIndex, move.symbol)
         gameDetails.moves.add(storedMove)
+        gameDetailsDictionary[move.gameId] = GameDetails(if (move.symbol == "X") "O" else "X", gameDetails.moves, move.userId)
 
         return move
     }

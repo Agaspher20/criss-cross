@@ -13,6 +13,10 @@ export class GameComponent extends React.Component<GameProps> {
         return this.props.model!;
     }
 
+    private get userId(): string {
+        return this.props.userId!;
+    }
+
     public render(): React.ReactElement {
         if (!this.model.exists) {
             return (<div className="game">
@@ -50,7 +54,7 @@ export class GameComponent extends React.Component<GameProps> {
     }
 
     private handleMove(cellIndex: number): void {
-        if (this.props.onMove && canSetSymbol(cellIndex, this.model)) {
+        if (this.props.onMove && this.canSetSymbol(cellIndex, this.model)) {
             this.props.onMove({
                 gameId: this.model.id,
                 cellIndex,
@@ -59,8 +63,8 @@ export class GameComponent extends React.Component<GameProps> {
             });
         }
     }
-}
 
-function canSetSymbol(i: number, model: GameModel): boolean {
-    return !model.cells[i] && !model.winnerSymbol;
+    private canSetSymbol(i: number, model: GameModel): boolean {
+        return !model.cells[i] && !model.winnerSymbol && model.lastMoveId !== this.userId;
+    }
 }

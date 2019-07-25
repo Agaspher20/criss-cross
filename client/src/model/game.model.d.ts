@@ -10,7 +10,6 @@ export interface GameModel extends GameItem, GameParameters {
 }
 
 export interface GameDtoModel {
-    readonly stepsCount: number;
     readonly nextSymbol: CellSymbols;
     readonly lastMoveId?: string;
     readonly winnerSymbol?: CellSymbols;

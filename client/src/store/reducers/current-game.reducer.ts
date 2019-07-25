@@ -49,7 +49,7 @@ function setGame(
     game: GameModel,
     { gameDto }: SetGameAction
 ): GameModel {
-    const { stepsCount, nextSymbol, lastMoveId, winnerSymbol, winnerName, moves } = gameDto;
+    const { nextSymbol, lastMoveId, winnerSymbol, winnerName, moves } = gameDto;
     const cellsArray = new Array(parameters.sideSize * parameters.sideSize);
 
     for(const { cellIndex, symbol } of moves) {
@@ -58,7 +58,7 @@ function setGame(
 
     return {
         ...game,
-        stepsCount,
+        stepsCount: moves.length,
         nextSymbol,
         cells: cellsArray,
         exists: true,
@@ -96,13 +96,14 @@ function moveGame(
     { move }: MoveGameAction
 ): GameModel {
     const cells = [...game.cells];
-    const { symbol, cellIndex } = move;
+    const { symbol, cellIndex, userId } = move;
     cells[cellIndex] = symbol;
 
     return {
         ...game,
         cells,
         nextSymbol: symbol === "X" ? "O" : "X",
+        lastMoveId: userId,
         winnerSymbol: calculateWinner(symbol, cells, cellIndex, game),
         stepsCount: game.stepsCount + 1
     };
