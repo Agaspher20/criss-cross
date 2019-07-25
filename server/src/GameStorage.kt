@@ -3,6 +3,7 @@ package com.crissCrossServer
 import io.ktor.http.cio.websocket.WebSocketSession
 import java.util.concurrent.ConcurrentHashMap
 import java.util.*
+import java.util.concurrent.locks.ReentrantReadWriteLock
 
 class GameStorage {
     private val usersDictionary = ConcurrentHashMap<String, String>()
@@ -41,7 +42,8 @@ class GameStorage {
         gameDetailsDictionary.getOrPut(id, {
             StoredGameDetails(
                 "X",
-                ConcurrentHashMap()
+                ConcurrentHashMap(),
+                ReentrantReadWriteLock(false)
             )
         })
     }

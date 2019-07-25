@@ -1,5 +1,6 @@
 package com.crissCrossServer
 
+import java.lang.Exception
 import java.util.concurrent.ConcurrentHashMap
 
 class GameService(private val storage: GameStorage) {
@@ -10,21 +11,32 @@ class GameService(private val storage: GameStorage) {
         }
 
         val storedMove = StoredGameMove(move.userId, move.cellIndex, move.symbol)
-        gameDetails.moves[storedMove.cellIndex] = storedMove
-        gameDetails.nextSymbol = if (move.symbol == "X") "O" else "X"
-        gameDetails.lastMoveId = move.userId
-        gameDetails.winnerSymbol = calculateWinner(
-            move.symbol,
-            gameDetails.moves,
-            move.cellIndex,
-            GameParameters(3, 4)
-        )
+        gameDetails.lock.writeLock().lock()
+        try {
+            if (!canSetSymbol(move, gameDetails)) {
+                return Pair(null, null)
+            }
 
-        if (gameDetails.winnerSymbol != null) {
-            gameDetails.winnerName = this.storage.getUser(move.userId).name
+            gameDetails.moves[storedMove.cellIndex] = storedMove
+            gameDetails.nextSymbol = if (move.symbol == "X") "O" else "X"
+            gameDetails.lastMoveId = move.userId
+            gameDetails.winnerSymbol = calculateWinner(
+                move.symbol,
+                gameDetails.moves,
+                move.cellIndex,
+                GameParameters(3, 4)
+            )
+
+            if (gameDetails.winnerSymbol != null) {
+                gameDetails.winnerName = this.storage.getUser(move.userId).name
+            }
+
+            return Pair(move, gameDetails.winnerName)
+        } catch (exc: Exception) {
+            return Pair(null, null)
+        } finally {
+            gameDetails.lock.writeLock().unlock()
         }
-
-        return Pair(move, gameDetails.winnerName)
     }
 
     private fun canSetSymbol(move: GameMove, details: StoredGameDetails): Boolean {

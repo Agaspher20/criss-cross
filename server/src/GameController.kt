@@ -45,11 +45,17 @@ class GameController(
             val gameText = if (storedGame == null ) {
                 ""
             } else {
-                val game = GameDetails(
-                    storedGame.nextSymbol,
-                    storedGame.moves.values.toList(),
-                    storedGame.lastMoveId,
-                    storedGame.winnerSymbol)
+                val game: GameDetails
+                storedGame.lock.readLock().lock()
+                try {
+                    game = GameDetails(
+                        storedGame.nextSymbol,
+                        storedGame.moves.values.toList(),
+                        storedGame.lastMoveId,
+                        storedGame.winnerSymbol)
+                } finally {
+                    storedGame.lock.readLock().unlock()
+                }
                 this.gson.toJson(game)
             }
             this.sendToChannel("game", gameText)
