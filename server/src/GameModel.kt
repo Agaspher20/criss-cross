@@ -4,23 +4,28 @@ import java.util.concurrent.ConcurrentHashMap
 
 data class Game(val id: Int, val name: String)
 
+data class GameParameters(val symbolsToWin: Int, val sideSize: Int)
+
 data class GameDetails(
     var nextSymbol: String,
     val moves: List<StoredGameMove>,
     var lastMoveId: String? = null,
-    var winnerSymbol: String? = null)
+    var winnerSymbol: String? = null,
+    var winnerName: String? = null)
 
 data class StoredGameDetails(
     var nextSymbol: String,
     val moves: ConcurrentHashMap<Int, StoredGameMove>,
     var lastMoveId: String? = null,
-    var winnerSymbol: String? = null)
+    var winnerSymbol: String? = null,
+    var winnerName: String? = null)
 
 data class GameMove(
     val gameId: Int,
     val userId: String,
     val cellIndex: Int,
-    val symbol: String
+    val symbol: String,
+    val winnerName: String?
 )
 
 data class StoredGameMove(
@@ -28,5 +33,7 @@ data class StoredGameMove(
     val cellIndex: Int,
     val symbol: String
 )
+
+data class Position (val rowIndex: Int, val columnIndex: Int)
 
 data class User(val id: String, val name: String?)

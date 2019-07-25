@@ -35,6 +35,7 @@ export interface StoredGameMove {
     readonly userId: string;
     readonly cellIndex: number;
     readonly symbol: CellSymbols;
+    readonly winnerName?: string;
 }
 
 export type CellSymbols = "X" | "O";

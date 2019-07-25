@@ -7,11 +7,11 @@ import io.ktor.http.cio.websocket.WebSocketSession
 
 class GameController(
     private val gameStorage: GameStorage,
+    private val gameService: GameService,
     private val userSession: UserSession,
     private val wsSession: WebSocketSession
 ) {
     private val gson = Gson()
-    private val gameService = GameService()
 
     suspend fun initializeSession() {
         val user = this.gameStorage.getUser(this.userSession.id)
@@ -61,13 +61,12 @@ class GameController(
     suspend fun gameMove(moveText: String) {
         try {
             val move = this.gson.fromJson(moveText, GameMove::class.java)
-            val gameDetails = this.gameStorage.getGameDetails(move.gameId)
-            val submittedMove = gameService.moveGame(move, gameDetails)
-
+            val (submittedMove, winnerName) = gameService.moveGame(move)
             if (submittedMove != null) {
                 val subscribers = gameStorage.getSubscribers(move.gameId)
+                val approvedMove = move.copy(winnerName = winnerName)
                 subscribers.forEach { session ->
-                    session.send(Frame.Text("game|move|$moveText"))
+                    session.send(Frame.Text("game|move|${this.gson.toJson(approvedMove)}"))
                 }
             }
         } catch (exc: JsonSyntaxException) {

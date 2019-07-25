@@ -96,7 +96,7 @@ function moveGame(
     { move }: MoveGameAction
 ): GameModel {
     const cells = [...game.cells];
-    const { symbol, cellIndex, userId } = move;
+    const { symbol, cellIndex, userId, winnerName } = move;
     cells[cellIndex] = symbol;
 
     return {
@@ -105,7 +105,8 @@ function moveGame(
         nextSymbol: symbol === "X" ? "O" : "X",
         lastMoveId: userId,
         winnerSymbol: calculateWinner(symbol, cells, cellIndex, game),
-        stepsCount: game.stepsCount + 1
+        stepsCount: game.stepsCount + 1,
+        winnerName
     };
 }
 
