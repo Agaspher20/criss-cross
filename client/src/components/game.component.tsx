@@ -49,7 +49,7 @@ export class GameComponent extends React.Component<GameProps> {
         return winnerSymbol
             ? `The winner is: ${winnerName || winnerSymbol}`
             : stepsCount < maxStepsCount
-                ? `Next player: ${nextSymbol}`
+                ? `Current symbol: "${nextSymbol}"; Your symbol: "${this.getPlayerSymbol()}"`
                 : "Game over";
     }
 
@@ -66,5 +66,10 @@ export class GameComponent extends React.Component<GameProps> {
 
     private canSetSymbol(i: number, model: GameModel): boolean {
         return !model.cells[i] && !model.winnerSymbol && model.lastMoveId !== this.userId;
+    }
+
+    private getPlayerSymbol(): string {
+        const { lastMoveId, nextSymbol } = this.model;
+        return lastMoveId === this.userId ? (nextSymbol === "X" ? "O" : "X") : nextSymbol;
     }
 }

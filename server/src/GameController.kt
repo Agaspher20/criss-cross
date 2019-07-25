@@ -53,7 +53,8 @@ class GameController(
                         storedGame.nextSymbol,
                         storedGame.moves.values.toList(),
                         storedGame.lastMoveId,
-                        storedGame.winnerSymbol)
+                        storedGame.winnerSymbol,
+                        storedGame.winnerName)
                 } finally {
                     storedGame.lock.readLock().unlock()
                 }
