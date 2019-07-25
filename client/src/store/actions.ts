@@ -1,5 +1,5 @@
 import { Action } from "redux";
-import { GameItem, GameDtoModel } from "../model/game.model";
+import { GameItem, GameDtoModel, GameMove } from "../model/game.model";
 import { UserModel } from "../model/user.model";
 
 export enum StoreActions {
@@ -55,7 +55,7 @@ export interface SetLastMoveIdAction extends Action<StoreActions.SetLastMoveId> 
 }
 
 export interface MoveGameAction extends Action<StoreActions.MoveGame> {
-    readonly cellIndex: number;
+    readonly move: GameMove;
 }
 
 export interface EnsureGameNameAction extends Action<StoreActions.EnsureGameName> {}
@@ -100,8 +100,8 @@ export function setLastMoveId(lastMoveId: string): SetLastMoveIdAction {
     return { type: StoreActions.SetLastMoveId, lastMoveId };
 }
 
-export function moveGame(cellIndex: number): MoveGameAction {
-    return { type: StoreActions.MoveGame, cellIndex };
+export function moveGame(move: GameMove): MoveGameAction {
+    return { type: StoreActions.MoveGame, move };
 }
 
 export function ensureGameName(): EnsureGameNameAction {

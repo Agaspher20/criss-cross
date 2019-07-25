@@ -93,17 +93,17 @@ function loadingGame(
 
 function moveGame(
     game: GameModel,
-    { cellIndex }: MoveGameAction
+    { move }: MoveGameAction
 ): GameModel {
-    const currentSymbol = game.nextSymbol;
-    const cells = [...game.cells];        
-    cells[cellIndex] = currentSymbol;
+    const cells = [...game.cells];
+    const { symbol, cellIndex } = move;
+    cells[cellIndex] = symbol;
 
     return {
         ...game,
         cells,
-        nextSymbol: currentSymbol === "X" ? "O" : "X",
-        winnerSymbol: calculateWinner(currentSymbol, cells, cellIndex, game),
+        nextSymbol: symbol === "X" ? "O" : "X",
+        winnerSymbol: calculateWinner(symbol, cells, cellIndex, game),
         stepsCount: game.stepsCount + 1
     };
 }

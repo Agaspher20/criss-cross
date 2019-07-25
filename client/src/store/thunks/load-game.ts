@@ -13,7 +13,7 @@ export function loadGame(
             dispatch(ensureGameName());
 
             subscribeGame(id, move => {
-                dispatch(moveGame(move.cellIndex));
+                dispatch(moveGame(move));
             });
         } catch (error) {
             if (error instanceof GameNotFoundError) {
