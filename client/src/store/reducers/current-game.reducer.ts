@@ -14,7 +14,7 @@ const parameters: GameParameters = {
     symbolsToWin: 3
 };
 
-const defaultGame: GameModel = {
+export const defaultGame: GameModel = {
     cells: [],
     exists: false,
     loading: false,
@@ -86,7 +86,7 @@ function loadingGame(
     return {
         ...game,
         id,
-        name: name || id.toString(),
+        name: name || "",
         loading: true,
     }
 }

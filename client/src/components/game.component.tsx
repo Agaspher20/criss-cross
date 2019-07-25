@@ -16,7 +16,7 @@ export class GameComponent extends React.Component<GameProps> {
     public render(): React.ReactElement {
         if (!this.model.exists) {
             return (<div className="game">
-                <p>Game with name "{this.model.name}" was not found.</p>
+                <p>Game with name "{this.model.name || this.model.id}" was not found.</p>
             </div>);
         }
 

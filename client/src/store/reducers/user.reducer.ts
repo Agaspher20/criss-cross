@@ -2,7 +2,7 @@ import { Action } from "redux";
 import { StoreActions, SetUserNameAction, SetUserAction } from "../actions";
 import { UserStateModel } from "../../model/user.model";
 
-const defaultUserModel: UserStateModel = {
+export const defaultUserModel: UserStateModel = {
     id: "",
     name: "",
     savingName: true

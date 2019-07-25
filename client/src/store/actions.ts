@@ -14,6 +14,7 @@ export enum StoreActions {
     SetGameNotFound = "SET_GAME_NOT_FOUND",
     SetLastMoveId = "SET_LAST_MOVE_ID",
     MoveGame = "MOVE_GAME",
+    EnsureGameName = "ENSURE_GAME_NAME",
 }
 
 export interface SetUserAction extends Action<StoreActions.SetUser> {
@@ -57,6 +58,8 @@ export interface MoveGameAction extends Action<StoreActions.MoveGame> {
     readonly cellIndex: number;
 }
 
+export interface EnsureGameNameAction extends Action<StoreActions.EnsureGameName> {}
+
 export function setUser(user: UserModel): SetUserAction {
     return { type: StoreActions.SetUser, user };
 }
@@ -99,4 +102,8 @@ export function setLastMoveId(lastMoveId: string): SetLastMoveIdAction {
 
 export function moveGame(cellIndex: number): MoveGameAction {
     return { type: StoreActions.MoveGame, cellIndex };
+}
+
+export function ensureGameName(): EnsureGameNameAction {
+    return { type: StoreActions.EnsureGameName };
 }
