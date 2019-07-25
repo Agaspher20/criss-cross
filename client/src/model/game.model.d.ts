@@ -2,10 +2,11 @@ export interface GameModel extends GameItem, GameParameters {
     readonly stepsCount: number;
     readonly nextSymbol: CellSymbols;
     readonly cells: ReadonlyArray<CellValues>;
-    readonly winnerSymbol?: CellSymbols;
-    readonly winnerName?: string;
     readonly exists: boolean;
     readonly loading: boolean;
+    readonly pendingMove?: GameMove;
+    readonly winnerSymbol?: CellSymbols;
+    readonly winnerName?: string;
     readonly lastMoveId?: string;
 }
 

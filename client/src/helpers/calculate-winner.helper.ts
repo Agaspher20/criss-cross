@@ -29,6 +29,10 @@ export function calculateWinner(
     parameters: GameParameters,
 ): CellValues {
     const position = getPositionByIndex(startIndex, parameters.sideSize);
+
+    if (cells[startIndex] !== symbol) {
+        return undefined;
+    }
     
     for(const moves of moveLaws) {
         let lineSymbolsCount = 1;

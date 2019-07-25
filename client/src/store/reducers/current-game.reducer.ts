@@ -1,11 +1,10 @@
 import { Action } from "redux";
-import { GameModel, GameParameters } from "../../model/game.model";
+import { GameModel, GameParameters, GameMove } from "../../model/game.model";
 import {
     StoreActions,
     MoveGameAction,
     LoadingGameAction,
     SetGameAction,
-    SetLastMoveIdAction
 } from "../actions";
 import { calculateWinner } from "../../helpers/calculate-winner.helper";
 
@@ -30,8 +29,6 @@ export function currentGame(
     action: Action<StoreActions>
 ): GameModel {
     switch (action.type) {
-        case StoreActions.SetLastMoveId:
-            return setLastMoveId(state, action as SetLastMoveIdAction);
         case StoreActions.MoveGame:
             return moveGame(state, action as MoveGameAction);
         case StoreActions.LoadingGame:
@@ -93,29 +90,45 @@ function loadingGame(
 
 function moveGame(
     game: GameModel,
-    { move }: MoveGameAction
+    { move, isPending }: MoveGameAction,
 ): GameModel {
     const cells = [...game.cells];
     const { symbol, cellIndex, userId, winnerName } = move;
     cells[cellIndex] = symbol;
 
+    const ensuredGame = !isPending && game.pendingMove && mustRevertPendingMove(move, game.pendingMove) ?
+        revertMove(game, game.pendingMove) :
+        game;
+
     return {
-        ...game,
+        ...ensuredGame,
         cells,
         nextSymbol: symbol === "X" ? "O" : "X",
         lastMoveId: userId,
         winnerSymbol: calculateWinner(symbol, cells, cellIndex, game),
         stepsCount: game.stepsCount + 1,
+        pendingMove: isPending ? move : undefined,
         winnerName
     };
 }
 
-function setLastMoveId(
+function revertMove(
     game: GameModel,
-    { lastMoveId }: SetLastMoveIdAction
+    pendingMove: GameMove,
 ): GameModel {
+    const cells = [...game.cells];
+    const { cellIndex } = pendingMove;
+    cells[cellIndex] = undefined;
+
     return {
         ...game,
-        lastMoveId
-    };
+        cells,
+        lastMoveId: undefined,
+        winnerSymbol: undefined,
+        stepsCount: game.stepsCount - 1,
+    }
+}
+
+function mustRevertPendingMove(move: GameMove, pendingMove: GameMove): boolean {
+    return move.symbol === pendingMove.symbol && move.cellIndex !== pendingMove.cellIndex;
 }

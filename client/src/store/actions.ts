@@ -13,7 +13,6 @@ export enum StoreActions {
     SetGame = "SET_GAME",
     SetDefaultGame = "SET_DEFAULT_GAME",
     SetGameNotFound = "SET_GAME_NOT_FOUND",
-    SetLastMoveId = "SET_LAST_MOVE_ID",
     MoveGame = "MOVE_GAME",
     EnsureGameName = "ENSURE_GAME_NAME",
 }
@@ -53,12 +52,9 @@ export interface SetDefaultGameAction extends Action<StoreActions.SetDefaultGame
 
 export interface SetGameNotFoundAction extends Action<StoreActions.SetGameNotFound> {}
 
-export interface SetLastMoveIdAction extends Action<StoreActions.SetLastMoveId> {
-    readonly lastMoveId: string;
-}
-
 export interface MoveGameAction extends Action<StoreActions.MoveGame> {
     readonly move: GameMove;
+    readonly isPending: boolean;
 }
 
 export interface EnsureGameNameAction extends Action<StoreActions.EnsureGameName> {}
@@ -103,12 +99,8 @@ export function setGameNotFound(): SetGameNotFoundAction {
     return { type: StoreActions.SetGameNotFound };
 }
 
-export function setLastMoveId(lastMoveId: string): SetLastMoveIdAction {
-    return { type: StoreActions.SetLastMoveId, lastMoveId };
-}
-
-export function moveGame(move: GameMove): MoveGameAction {
-    return { type: StoreActions.MoveGame, move };
+export function moveGame(move: GameMove, isPending: boolean = false): MoveGameAction {
+    return { type: StoreActions.MoveGame, move, isPending };
 }
 
 export function ensureGameName(): EnsureGameNameAction {
