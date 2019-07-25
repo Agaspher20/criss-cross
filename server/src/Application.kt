@@ -1,6 +1,5 @@
 package com.crissCrossServer
 
-import com.google.gson.Gson
 import io.ktor.application.*
 import io.ktor.response.*
 import io.ktor.routing.*
@@ -25,7 +24,7 @@ fun Application.module() {
     val gameServer = GameServer()
 
     install(Sessions) {
-        cookie<GameSession>("SESSION") {
+        cookie<UserSession>("SESSION") {
             cookie.extensions["SameSite"] = "lax"
         }
     }
@@ -46,8 +45,8 @@ fun Application.module() {
         }
     }
     intercept(ApplicationCallPipeline.Features) {
-        if (call.sessions.get<GameSession>() == null) {
-            call.sessions.set(GameSession(generateNonce()))
+        if (call.sessions.get<UserSession>() == null) {
+            call.sessions.set(UserSession(generateNonce()))
         }
     }
 
@@ -57,27 +56,16 @@ fun Application.module() {
             resource("/game/*", "static/index.html")
         }
 
-        // Static feature. Try to access `/static/ktor_logo.svg`
         static("/static") {
             resources("static")
         }
 
         webSocket("/ws/game") {
-            val gson = Gson()
-            val session = call.sessions.get<GameSession>()!!
-            val gameRouter = GameRouter(gameServer, session, this)
-            val user = gameServer.getUser(session)
+            val session = call.sessions.get<UserSession>()!!
+            val gameController = GameController(gameServer, session, this)
+            val gameRouter = GameRouter(gameController)
 
-            if (user != null) {
-                send(Frame.Text("user|${gson.toJson(user)}"))
-            } else {
-                send(Frame.Text("user|"))
-            }
-
-            val gamesJson = gson.toJson(gameServer.getAllGames().toList())
-            send(Frame.Text("games|$gamesJson"))
-
-            send(Frame.Text("initialized|${session.id}"))
+            gameController.initializeSession()
             try {
                 incoming.consumeEach { frame ->
                     if (frame is Frame.Text) {

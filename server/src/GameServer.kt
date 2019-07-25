@@ -33,12 +33,12 @@ class GameServer {
     private val gamesMovesSubscriptionsDictionary = ConcurrentHashMap<Int, ConcurrentHashMap<WebSocketSession, WebSocketSession>>()
     private val webSocketToGameDictionary = ConcurrentHashMap<WebSocketSession, Int>()
 
-    fun setUserName(session: GameSession, userName: String) {
-        usersDictionary[session.id] = userName
+    fun setUserName(userId: String, userName: String) {
+        usersDictionary[userId] = userName
     }
 
-    fun getUser(session: GameSession): User {
-        return User(session.id, usersDictionary[session.id])
+    fun getUser(userId: String): User {
+        return User(userId, usersDictionary[userId])
     }
 
     fun getAllGames(): Enumeration<Game> {

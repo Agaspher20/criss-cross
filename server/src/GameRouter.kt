@@ -1,93 +1,69 @@
 package com.crissCrossServer
 
-import com.google.gson.Gson
-import com.google.gson.JsonSyntaxException
-import io.ktor.http.cio.websocket.Frame
-import io.ktor.http.cio.websocket.WebSocketSession
+import java.lang.Exception
+import kotlin.arrayOf
+
+class FrameRoutingException(message: String) : Exception(message)
+
+class FrameHandler(
+    private val channelName: String,
+    private val handler: suspend (frame: String, commandHandlers: Array<FrameHandler>?) -> Unit,
+    private val commandHandlers: Array<FrameHandler>? = null
+) {
+    private val channelPrefix: String
+        get () = "${this.channelName}|"
+
+    fun canHandleFrame(frame: String): Boolean {
+        return frame.startsWith(this.channelPrefix)
+    }
+
+    suspend fun handleFrame(frame: String) {
+        this.handler(frame.removePrefix(this.channelPrefix), this.commandHandlers)
+    }
+}
 
 class GameRouter(
-        private val server: GameServer,
-        private val gameSession: GameSession,
-        private val wsSession: WebSocketSession) {
-    public suspend fun routeFrame(frameText: String) {
-        when {
-            frameText.startsWith("user|") -> {
-                val userName = frameText.removePrefix("user|")
-                this.server.setUserName(this.gameSession, userName)
-                this.wsSession.send(Frame.Text("user|$userName"))
-            }
-            frameText.startsWith("games|") -> {
-                val command = frameText.removePrefix("games|")
-                when {
-                    command.startsWith("create|") -> {
-                        val gameName = command.removePrefix("create|")
-                        val game = this.server.createGame(gameName)
-                        this.wsSession.send(Frame.Text("games|${game.id}"))
-                    }
-                }
-            }
-            frameText.startsWith("game|") -> {
-                val command = frameText.removePrefix("game|")
-                when {
-                    command.startsWith("load|") -> {
-                        val idString = command.removePrefix("load|")
+        private val gameController: GameController) {
 
-                        try {
-                            val id = idString.toInt()
-                            val game = this.server.getGameDetails(id)
+    private val handlers = arrayOf(
+        FrameHandler(
+            "user",
+            { userName, _ -> this.gameController.setUserName(userName) }
+        ),
+        FrameHandler(
+            "games",
+            { command, handlers -> handleFrame(command, handlers) },
+            arrayOf(
+                FrameHandler("create", { gameName, _ -> this.gameController.createGame(gameName) })
+            )
+        ),
+        FrameHandler(
+            "game",
+            { command, handlers -> handleFrame(command, handlers) },
+            arrayOf(
+                FrameHandler("load", { idString, _ -> this.gameController.loadGame(idString) }),
+                FrameHandler("move", { moveText, _ -> this.gameController.gameMove(moveText) }),
+                FrameHandler("subscribe", { gameIdString, _ -> this.gameController.subscribeToGame(gameIdString) }),
+                FrameHandler("unsubscribe", { gameIdString, _ -> this.gameController.unsubscribeFromGame(gameIdString) })
+            )
+        )
+    )
 
-                            val gameText = if (game == null ) {
-                                ""
-                            } else {
-                                val gson = Gson()
-                                gson.toJson(game)
-                            }
-                            this.wsSession.send(Frame.Text("game|$gameText"))
-                        } catch (exc: NumberFormatException) {
-                            this.wsSession.send(Frame.Text("game|"))
-                        }
-                    }
-                    command.startsWith("move|") -> {
-                        val moveText = command.removePrefix("move|")
-                        val gson = Gson()
-
-                        try {
-                            val move = gson.fromJson(moveText, GameMove::class.java)
-                            val submittedMove = server.moveGame(move)
-
-                            if (submittedMove != null) {
-                                val subscribers = server.getSubscribers(move.gameId)
-                                subscribers.forEach { session ->
-                                    session.send(Frame.Text("game|move|$moveText"))
-                                }
-                            }
-                        } catch (exc: JsonSyntaxException) {
-                            // skip move
-                        }
-                    }
-                    command.startsWith("subscribe|") -> {
-                        val gameIdString = command.removePrefix("subscribe|")
-                        try {
-                            val gameId = gameIdString.toInt()
-                            server.subscribeGame(gameId, this.wsSession)
-                        } catch (exc: NumberFormatException) {
-                            // do not add subscription
-                        }
-                    }
-                    command.startsWith("unsubscribe|") -> {
-                        val gameIdString = command.removePrefix("unsubscribe|")
-                        try {
-                            val gameId = gameIdString.toInt()
-                            server.unsubscribeGame(gameId, this.wsSession)
-                        } catch (exc: NumberFormatException) {
-                            // do not add subscription
-                        }
-                    }
-                }
-            }
-            else -> {
-                wsSession.send(Frame.Text("Unknown action \"$frameText\""))
-            }
+    suspend fun routeFrame(frameText: String) {
+        try {
+            handleFrame(frameText, this.handlers)
+        } catch (exc: FrameRoutingException) {
+            println("[ERROR] ${exc.message}")
         }
+    }
+}
+
+suspend fun handleFrame(frameText: String, handlers: Array<FrameHandler>?) {
+    val handler = handlers?.firstOrNull { handler -> handler.canHandleFrame(frameText) }
+
+    if (handler != null) {
+        handler.handleFrame(frameText)
+    } else {
+        throw FrameRoutingException("Unknown action \"$frameText\"")
     }
 }

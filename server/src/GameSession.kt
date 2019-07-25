@@ -1,3 +1,3 @@
 package com.crissCrossServer
 
-data class GameSession(val id: String)
+data class UserSession(val id: String)
