@@ -54,6 +54,7 @@ fun Application.module() {
     routing {
         static {
             resource("/", "static/index.html")
+            resource("/game/*", "static/index.html")
         }
 
         // Static feature. Try to access `/static/ktor_logo.svg`
