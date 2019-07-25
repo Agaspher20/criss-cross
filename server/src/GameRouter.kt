@@ -56,7 +56,8 @@ class GameRouter(
                             val submittedMove = server.moveGame(move)
 
                             if (submittedMove != null) {
-                                server.getSubscribers(move.gameId).forEach { session ->
+                                val subscribers = server.getSubscribers(move.gameId)
+                                subscribers.forEach { session ->
                                     session.send(Frame.Text("game|move|$moveText"))
                                 }
                             }
@@ -64,16 +65,20 @@ class GameRouter(
                             // skip move
                         }
                     }
-                }
-            }
-            frameText.startsWith("subscribe|") -> {
-                val command = frameText.removePrefix("subscribe|")
-                when {
-                    command.startsWith("game|") -> {
-                        val gameIdString = command.removePrefix("game|")
+                    command.startsWith("subscribe|") -> {
+                        val gameIdString = command.removePrefix("subscribe|")
                         try {
                             val gameId = gameIdString.toInt()
                             server.subscribeGame(gameId, this.wsSession)
+                        } catch (exc: NumberFormatException) {
+                            // do not add subscription
+                        }
+                    }
+                    command.startsWith("unsubscribe|") -> {
+                        val gameIdString = command.removePrefix("unsubscribe|")
+                        try {
+                            val gameId = gameIdString.toInt()
+                            server.unsubscribeGame(gameId, this.wsSession)
                         } catch (exc: NumberFormatException) {
                             // do not add subscription
                         }

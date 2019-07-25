@@ -6,7 +6,6 @@ enum Channels {
     User = "user",
     Game = "game",
     Games = "games",
-    Subscribe = "subscribe",
 }
 
 export function subscribeGame(gameId: number, callback: (move: GameMove) => void): void {
@@ -18,7 +17,7 @@ export function subscribeGame(gameId: number, callback: (move: GameMove) => void
             }
         }
     });
-    sendData(Channels.Subscribe, `game|${gameId}`);
+    sendData(Channels.Game, `subscribe|${gameId}`);
 }
 
 export function submitUserName(name: string): Promise<string> {
