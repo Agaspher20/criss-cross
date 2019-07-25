@@ -1,5 +1,5 @@
 import { Action } from "redux";
-import { GameItem, GameDtoModel, GameMove } from "../model/game.model";
+import { GameItem, GameDtoModel, GameMove, GameParameters } from "../model/game.model";
 import { UserModel } from "../model/user.model";
 
 export enum StoreActions {
@@ -15,6 +15,7 @@ export enum StoreActions {
     SetGameNotFound = "SET_GAME_NOT_FOUND",
     MoveGame = "MOVE_GAME",
     EnsureGameName = "ENSURE_GAME_NAME",
+    SetGameParameters = "SET_GAME_PARAMETERS"
 }
 
 export interface SetUserAction extends Action<StoreActions.SetUser> {
@@ -51,6 +52,10 @@ export interface SetGameAction extends Action<StoreActions.SetGame> {
 export interface SetDefaultGameAction extends Action<StoreActions.SetDefaultGame> {}
 
 export interface SetGameNotFoundAction extends Action<StoreActions.SetGameNotFound> {}
+
+export interface SetGameParametersAction extends Action<StoreActions.SetGameParameters> {
+    readonly parameters: GameParameters;
+}
 
 export interface MoveGameAction extends Action<StoreActions.MoveGame> {
     readonly move: GameMove;
@@ -97,6 +102,10 @@ export function setDefaultGame(): SetDefaultGameAction {
 
 export function setGameNotFound(): SetGameNotFoundAction {
     return { type: StoreActions.SetGameNotFound };
+}
+
+export function setGameParameters(parameters: GameParameters) : SetGameParametersAction {
+    return { type: StoreActions.SetGameParameters, parameters };
 }
 
 export function moveGame(move: GameMove, isPending: boolean = false): MoveGameAction {

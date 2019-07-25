@@ -5,13 +5,9 @@ import {
     MoveGameAction,
     LoadingGameAction,
     SetGameAction,
+    SetGameParametersAction,
 } from "../actions";
 import { calculateWinner } from "../../helpers/calculate-winner.helper";
-
-const parameters: GameParameters = {
-    sideSize: 4,
-    symbolsToWin: 3
-};
 
 export const defaultGame: GameModel = {
     cells: [],
@@ -21,7 +17,8 @@ export const defaultGame: GameModel = {
     name: "",
     nextSymbol: "X",
     stepsCount: 0,
-    ...parameters
+    sideSize: 10,
+    symbolsToWin: 5
 }
 
 export function currentGame(
@@ -37,6 +34,8 @@ export function currentGame(
             return setGame(state, action as SetGameAction);
         case StoreActions.SetGameNotFound:
             return setGameNotFound(state);
+        case StoreActions.SetGameParameters:
+            return setGameParameters(state, action as SetGameParametersAction);
         default:
             return state;
     }
@@ -47,7 +46,7 @@ function setGame(
     { gameDto }: SetGameAction
 ): GameModel {
     const { nextSymbol, lastMoveId, winnerSymbol, winnerName, moves } = gameDto;
-    const cellsArray = new Array(parameters.sideSize * parameters.sideSize);
+    const cellsArray = new Array(game.sideSize * game.sideSize);
 
     for(const { cellIndex, symbol } of moves) {
         cellsArray[cellIndex] = symbol;
@@ -131,4 +130,12 @@ function revertMove(
 
 function mustRevertPendingMove(move: GameMove, pendingMove: GameMove): boolean {
     return move.symbol === pendingMove.symbol && move.cellIndex !== pendingMove.cellIndex;
+}
+
+function setGameParameters(state: GameModel, { parameters }: SetGameParametersAction): GameModel {
+    return {
+        ...state,
+        sideSize: parameters.sideSize,
+        symbolsToWin: parameters.symbolsToWin
+    };
 }

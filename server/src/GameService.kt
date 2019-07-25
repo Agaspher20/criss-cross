@@ -3,7 +3,7 @@ package com.crissCrossServer
 import java.lang.Exception
 import java.util.concurrent.ConcurrentHashMap
 
-class GameService(private val storage: GameStorage) {
+class GameService(private val parameters: GameParameters, private val storage: GameStorage) {
     fun moveGame(move: GameMove): Pair<GameMove?, String?> {
         val gameDetails = this.storage.getGameDetails(move.gameId)
         if (gameDetails == null || !canSetSymbol(move, gameDetails)) {
@@ -24,7 +24,7 @@ class GameService(private val storage: GameStorage) {
                 move.symbol,
                 gameDetails.moves,
                 move.cellIndex,
-                GameParameters(3, 4)
+                parameters
             )
 
             if (gameDetails.winnerSymbol != null) {

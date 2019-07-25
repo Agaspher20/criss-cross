@@ -1,8 +1,8 @@
 package com.crissCrossServer
 
 import io.ktor.http.cio.websocket.WebSocketSession
+import java.lang.Exception
 import java.util.concurrent.ConcurrentHashMap
-import java.util.*
 import java.util.concurrent.locks.ReentrantReadWriteLock
 
 class GameStorage {
@@ -13,6 +13,7 @@ class GameStorage {
     private val gameDetailsDictionary = ConcurrentHashMap<Int, StoredGameDetails>()
     private val gamesMovesSubscriptionsDictionary = ConcurrentHashMap<Int, ConcurrentHashMap<WebSocketSession, WebSocketSession>>()
     private val webSocketToGameDictionary = ConcurrentHashMap<WebSocketSession, Int>()
+    private val gameListLock = ReentrantReadWriteLock(false)
 
     fun setUserName(userId: String, userName: String) {
         usersDictionary[userId] = userName
@@ -22,18 +23,32 @@ class GameStorage {
         return User(userId, usersDictionary[userId])
     }
 
-    fun getAllGames(): Enumeration<Game> {
-        return gamesDictionary.elements()
+    fun getAllGames(): List<Game> {
+        gameListLock.readLock().lock()
+
+        return try {
+            gamesDictionary.elements().toList()
+        } catch (exc: Exception) {
+            listOf()
+        } finally {
+            gameListLock.readLock().unlock()
+        }
     }
 
     fun createGame(name: String): Game {
-        val id = lastGameId
-        ++lastGameId
+        gameListLock.writeLock().lock()
 
-        val game = Game(id, name)
-        gamesDictionary[id] = game
+        try {
+            val id = lastGameId
+            ++lastGameId
 
-        return game
+            val game = Game(id, name)
+            gamesDictionary[id] = game
+
+            return game
+        } finally {
+            gameListLock.writeLock().unlock()
+        }
     }
 
     fun getGameDetails(id: Int): StoredGameDetails? = if (!gamesDictionary.containsKey(id)) {

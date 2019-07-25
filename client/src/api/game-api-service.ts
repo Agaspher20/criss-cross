@@ -1,11 +1,12 @@
 import { requestResponse, listenFirst, sendData, listenChannel, ChannelCallback, stopListenChannel } from "./game.api";
-import { GameItem, GameDtoModel, GameMove } from "../model/game.model";
+import { GameItem, GameDtoModel, GameMove, GameParameters } from "../model/game.model";
 import { UserModel } from "../model/user.model";
 
 enum Channels {
     User = "user",
     Game = "game",
     Games = "games",
+    Init = "init"
 }
 
 type GameMoveCallback = (move: GameMove) => void;
@@ -60,6 +61,11 @@ export function submitUserName(name: string): Promise<string> {
 export async function fetchUser(): Promise<UserModel> {
     const userString = await listenFirst(Channels.User);
     return JSON.parse(userString);
+}
+
+export async function fetchParameters(): Promise<GameParameters> {
+    const paramsString = await listenFirst(Channels.Init);
+    return JSON.parse(paramsString);
 }
 
 export async function submitGame(name: string): Promise<number> {

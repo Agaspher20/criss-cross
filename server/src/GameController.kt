@@ -6,6 +6,7 @@ import io.ktor.http.cio.websocket.Frame
 import io.ktor.http.cio.websocket.WebSocketSession
 
 class GameController(
+    private val gameParameters: GameParameters,
     private val gameStorage: GameStorage,
     private val gameService: GameService,
     private val userSession: UserSession,
@@ -19,8 +20,8 @@ class GameController(
         this.sendToChannel("user", gson.toJson(user))
 
         val gamesJson = gson.toJson(gameStorage.getAllGames().toList())
+        this.sendToChannel("init", this.gson.toJson(this.gameParameters))
         this.sendToChannel("games", gamesJson)
-        this.sendToChannel("initialized", this.userSession.id)
     }
 
     fun disposeSession() {
