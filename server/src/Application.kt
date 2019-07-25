@@ -78,10 +78,14 @@ fun Application.module() {
             send(Frame.Text("games|$gamesJson"))
 
             send(Frame.Text("initialized|${session.id}"))
-            incoming.consumeEach { frame ->
-                if (frame is Frame.Text) {
-                    gameRouter.routeFrame(frame.readText())
+            try {
+                incoming.consumeEach { frame ->
+                    if (frame is Frame.Text) {
+                        gameRouter.routeFrame(frame.readText())
+                    }
                 }
+            } finally {
+                gameServer.memberLeft(this)
             }
         }
 

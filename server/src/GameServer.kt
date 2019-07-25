@@ -31,6 +31,7 @@ class GameServer {
     private val gamesDictionary = ConcurrentHashMap<Int, Game>()
     private val gameDetailsDictionary = ConcurrentHashMap<Int, GameDetails>()
     private val gamesMovesSubscriptionsDictionary = ConcurrentHashMap<Int, ConcurrentHashMap<WebSocketSession, WebSocketSession>>()
+    private val webSocketToGameDictionary = ConcurrentHashMap<WebSocketSession, Int>()
 
     fun setUserName(session: GameSession, userName: String) {
         usersDictionary[session.id] = userName
@@ -82,11 +83,24 @@ class GameServer {
     fun subscribeGame(gameId: Int, session: WebSocketSession) {
         val subscribers = gamesMovesSubscriptionsDictionary.getOrPut(gameId, { ConcurrentHashMap() })
         subscribers[session] = session
+        webSocketToGameDictionary[session] = gameId
     }
 
     fun unsubscribeGame(gameId: Int, session: WebSocketSession) {
         val subscribers = gamesMovesSubscriptionsDictionary.getOrPut(gameId, { ConcurrentHashMap() })
         subscribers.remove(session)
+    }
+
+    fun memberLeft(session: WebSocketSession) {
+        val gameId = webSocketToGameDictionary.getOrDefault(session, -1)
+        webSocketToGameDictionary.remove(session)
+        println("removing member $gameId")
+        if (gameId > -1) {
+            val subscriptions = gamesMovesSubscriptionsDictionary.getOrElse(gameId, { ConcurrentHashMap() })
+            subscriptions.remove(session)
+            println("removed game subscription")
+        }
+        println("removed member")
     }
 
     fun getSubscribers(gameId: Int): Collection<WebSocketSession> {
