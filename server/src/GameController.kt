@@ -10,6 +10,7 @@ class GameController(
     private val gameParameters: GameParameters,
     private val gameStorage: GameStorage,
     private val gameService: GameService,
+    private val gameListService: GameListService,
     private val userSession: UserSession,
     private val wsSession: WebSocketSession
 ) {
@@ -21,12 +22,12 @@ class GameController(
 
         this.sendToChannel("user", gson.toJson(user))
         this.sendToChannel("init", this.gson.toJson(this.gameParameters))
-        this.sendToChannel("games|list", gson.toJson(gameStorage.getAllGames()))
+        this.sendToChannel("games|list", gson.toJson(this.gameListService.getAllGames()))
     }
 
     fun disposeSession() {
         this.gameStorage.unregisterUser(this.wsSession)
-        this.gameStorage.memberLeft(this.wsSession)
+        this.gameListService.memberLeft(this.wsSession)
     }
 
     suspend fun setUserName(userName: String) {
@@ -36,9 +37,9 @@ class GameController(
 
     @KtorExperimentalAPI
     suspend fun createGame(gameName: String) {
-        val game = this.gameStorage.createGame(gameName)
+        val game = this.gameListService.createGame(gameName)
         this.sendToChannel("games|create", game.id)
-        this.broadcast("games|updated", gson.toJson(game))
+        this.broadcastGameUpdate(game)
     }
 
     suspend fun loadGame(id: String) {
@@ -62,7 +63,7 @@ class GameController(
             this.gson.toJson(game)
         }
         this.sendToChannel("game|load", gameText)
-        this.gameStorage.subscribeGame(id, this.wsSession)
+        this.gameListService.enterGame(id, this.wsSession)
     }
 
     suspend fun gameMove(moveText: String) {
@@ -81,10 +82,16 @@ class GameController(
         }
     }
 
-    fun unsubscribeFromGame(gameId: String) = gameStorage.unsubscribeGame(gameId, this.wsSession)
+    fun leaveGame(gameId: String) = this.gameListService.leaveGame(gameId, this.wsSession)
 
     private suspend fun sendToChannel(channelName: String, payload: String = "") {
         this.send(this.wsSession, channelName, payload)
+    }
+
+    private suspend fun broadcastGameUpdate(game: Game?) {
+        if (game != null) {
+            this.broadcast("games|updated", gson.toJson(game))
+        }
     }
 
     private suspend fun broadcast(channelName: String, payload: String = "") {

@@ -1,11 +1,10 @@
 package com.crissCrossServer
 
 import io.ktor.http.cio.websocket.WebSocketSession
-import io.ktor.util.KtorExperimentalAPI
-import io.ktor.util.generateNonce
-import java.lang.Exception
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantReadWriteLock
+import kotlin.collections.ArrayList
 
 class GameStorage {
     private val usersDictionary = ConcurrentHashMap<String, String>()
@@ -15,7 +14,6 @@ class GameStorage {
     private val gamesMovesSubscriptionsDictionary = ConcurrentHashMap<String, ConcurrentHashMap<WebSocketSession, WebSocketSession>>()
     private val webSocketToGameDictionary = ConcurrentHashMap<WebSocketSession, String>()
     private val participants = ArrayList<WebSocketSession>()
-    private val gameListLock = ReentrantReadWriteLock(false)
     private val participantsLock = ReentrantReadWriteLock(false)
 
     fun setUserName(userId: String, userName: String) {
@@ -56,32 +54,12 @@ class GameStorage {
         }
     }
 
-    fun getAllGames(): List<Game> {
-        gameListLock.readLock().lock()
+    fun getGames(): Enumeration<Game> = gamesDictionary.elements()
 
-        return try {
-            gamesDictionary.elements().toList()
-        } catch (exc: Exception) {
-            listOf()
-        } finally {
-            gameListLock.readLock().unlock()
-        }
-    }
+    fun getGame(gameId: String): Game = gamesDictionary.getValue(gameId)
 
-    @KtorExperimentalAPI
-    fun createGame(name: String): Game {
-        gameListLock.writeLock().lock()
-
-        try {
-            val id = generateNonce()
-
-            val game = Game(id, name)
-            gamesDictionary[id] = game
-
-            return game
-        } finally {
-            gameListLock.writeLock().unlock()
-        }
+    fun putGame(game: Game) {
+        gamesDictionary[game.id] = game
     }
 
     fun getGameDetails(id: String): StoredGameDetails? = if (!gamesDictionary.containsKey(id)) {
@@ -96,27 +74,26 @@ class GameStorage {
         })
     }
 
-    fun subscribeGame(gameId: String, session: WebSocketSession) {
+    fun saveGameSubscription(gameId: String, session: WebSocketSession) {
         val subscribers = gamesMovesSubscriptionsDictionary.getOrPut(gameId, { ConcurrentHashMap() })
         subscribers[session] = session
         webSocketToGameDictionary[session] = gameId
     }
 
-    fun unsubscribeGame(gameId: String, session: WebSocketSession) {
+    fun removeGameSubscriptionById(gameId: String, session: WebSocketSession) {
         val subscribers = gamesMovesSubscriptionsDictionary.getOrPut(gameId, { ConcurrentHashMap() })
         subscribers.remove(session)
+        webSocketToGameDictionary.remove(session)
     }
 
-    fun memberLeft(session: WebSocketSession) {
+    fun removeGameSubscriptionBySession(session: WebSocketSession): String? {
         val gameId = webSocketToGameDictionary[session]
-        webSocketToGameDictionary.remove(session)
-        println("removing member $gameId")
+
         if (gameId != null) {
-            val subscriptions = gamesMovesSubscriptionsDictionary.getOrElse(gameId, { ConcurrentHashMap() })
-            subscriptions.remove(session)
-            println("removed game subscription")
+            removeGameSubscriptionById(gameId, session)
         }
-        println("removed member")
+
+        return gameId
     }
 
     fun getSubscribers(gameId: String): Collection<WebSocketSession> {

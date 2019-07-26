@@ -63,8 +63,13 @@ fun Application.module() {
 
         webSocket("/ws/game") {
             val session = call.sessions.get<UserSession>()!!
-            val gameService = GameService(gameParameters, gameStorage)
-            val gameController = GameController(gameParameters, gameStorage, gameService, session, this)
+            val gameController = GameController(
+                gameParameters,
+                gameStorage,
+                GameService(gameParameters, gameStorage),
+                GameListService(gameStorage),
+                session,
+                this)
             val gameRouter = GameRouter(gameController)
 
             gameController.initializeSession()

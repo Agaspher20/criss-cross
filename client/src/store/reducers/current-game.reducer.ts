@@ -18,7 +18,8 @@ export const defaultGame: GameModel = {
     nextSymbol: "X",
     stepsCount: 0,
     sideSize: 10,
-    symbolsToWin: 5
+    symbolsToWin: 5,
+    participantsCount: 0,
 }
 
 export function currentGame(

@@ -45,7 +45,7 @@ class GameRouter(
             arrayOf(
                 FrameHandler("load", { idString, _ -> this.gameController.loadGame(idString) }),
                 FrameHandler("move", { moveText, _ -> this.gameController.gameMove(moveText) }),
-                FrameHandler("unsubscribe", { gameIdString, _ -> this.gameController.unsubscribeFromGame(gameIdString) })
+                FrameHandler("unsubscribe", { gameIdString, _ -> this.gameController.leaveGame(gameIdString) })
             )
         )
     )

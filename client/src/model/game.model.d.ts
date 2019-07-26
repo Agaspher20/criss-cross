@@ -21,6 +21,7 @@ export interface GameDtoModel {
 export interface GameItem {
     readonly id: string;
     readonly name: string;
+    readonly participantsCount: number;
 }
 
 export interface GameParameters {

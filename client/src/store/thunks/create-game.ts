@@ -8,7 +8,7 @@ export function createGame(dispatch: Dispatch): (name: string) => Promise<void> 
 
         const id = await submitGame(name);
 
-        dispatch(updateGameList({ id, name }))
+        dispatch(updateGameList({ id, name, participantsCount: 0 }))
         dispatch(savingGame(false));
     };
 }
