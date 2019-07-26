@@ -25,9 +25,9 @@ class GameController(
         this.sendToChannel("games|list", gson.toJson(this.gameListService.getAllGames()))
     }
 
-    fun disposeSession() {
+    suspend fun disposeSession() {
         this.gameStorage.unregisterUser(this.wsSession)
-        this.gameListService.memberLeft(this.wsSession)
+        this.broadcastGameUpdate(this.gameListService.memberLeft(this.wsSession))
     }
 
     suspend fun setUserName(userName: String) {
@@ -63,7 +63,7 @@ class GameController(
             this.gson.toJson(game)
         }
         this.sendToChannel("game|load", gameText)
-        this.gameListService.enterGame(id, this.wsSession)
+        this.broadcastGameUpdate(this.gameListService.enterGame(id, this.wsSession))
     }
 
     suspend fun gameMove(moveText: String) {
@@ -82,7 +82,7 @@ class GameController(
         }
     }
 
-    fun leaveGame(gameId: String) = this.gameListService.leaveGame(gameId, this.wsSession)
+    suspend fun leaveGame(gameId: String) = this.broadcastGameUpdate(this.gameListService.leaveGame(gameId, this.wsSession))
 
     private suspend fun sendToChannel(channelName: String, payload: String = "") {
         this.send(this.wsSession, channelName, payload)

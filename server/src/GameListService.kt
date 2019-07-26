@@ -35,19 +35,33 @@ class GameListService(private val storage: GameStorage) {
     fun enterGame(gameId: String, session: WebSocketSession): Game {
         this.storage.saveGameSubscription(gameId, session)
 
-        return this.getGame(gameId)
+        return updateGame(gameId, GameUpdate(1))
     }
 
     fun leaveGame(gameId: String, session: WebSocketSession): Game {
         this.storage.removeGameSubscriptionById(gameId, session)
 
-        return this.getGame(gameId)
+        return updateGame(gameId, GameUpdate(-1))
     }
 
     fun memberLeft(session: WebSocketSession): Game? {
         val gameId = this.storage.removeGameSubscriptionBySession(session)
 
-        return if (gameId == null ) null else this.getGame(gameId)
+        return if (gameId == null ) null else updateGame(gameId, GameUpdate(-1))
+    }
+
+    private fun updateGame(gameId: String, update: GameUpdate): Game {
+        val game = this.getGame(gameId)
+        val updatedGame = game.copy(participantsCount = game.participantsCount + update.participantsDelta)
+
+        this.gameListLock.writeLock().lock()
+        try {
+            this.storage.putGame(updatedGame)
+        } finally {
+            this.gameListLock.writeLock().unlock()
+        }
+
+        return updatedGame
     }
 
     private fun getGame(gameId: String): Game {

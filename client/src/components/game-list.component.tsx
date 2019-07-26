@@ -20,7 +20,10 @@ export class GameListComponent extends React.Component<GameListModel> {
         return <ul>{ (this.props.games || []).map(game => this.renderGameItem(game)) }</ul>;
     }
 
-    private renderGameItem({ id, name }: GameItem): React.ReactElement {
-        return (<li key={id}><Link to={`/game/${id}`}>{name}</Link></li>);
+    private renderGameItem({ id, name, participantsCount }: GameItem): React.ReactElement {
+        return (<li key={id}>
+            <p><Link to={`/game/${id}`}>{name}</Link></p>
+            <p>Participants count: {participantsCount}</p>
+        </li>);
     }
 }

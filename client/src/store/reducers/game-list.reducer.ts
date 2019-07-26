@@ -31,7 +31,7 @@ function updateGameList(
     let games: ReadonlyArray<GameItem>;
 
     if (state.idsSet.has(game.id)) {
-        games = state.games;
+        games = state.games.map(gm => gm.id === game.id ? game : gm);
     } else {
         games = [game, ...state.games];
         state.idsSet.add(game.id);

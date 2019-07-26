@@ -5,6 +5,8 @@ import java.util.concurrent.locks.ReadWriteLock
 
 data class Game(val id: String, val name: String, val participantsCount: Int)
 
+data class GameUpdate(val participantsDelta: Int)
+
 data class GameParameters(val symbolsToWin: Int, val sideSize: Int)
 
 data class GameDetails(
