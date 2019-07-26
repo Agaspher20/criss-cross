@@ -1,8 +1,8 @@
 import { createStore, applyMiddleware } from "redux";
 import thunkMiddleware from "redux-thunk";
-import { setUser, setGames, ensureGameName, setGameParameters } from "./actions";
+import { setUser, setGames, ensureGameName, setGameParameters, updateGameList } from "./actions";
 import { UserStateModel } from "../model/user.model";
-import { fetchUser, fetchGames, fetchParameters } from "../api/game-api-service";
+import { fetchUser, fetchGames, fetchParameters, subscribeGameListUpdates } from "../api/game-api-service";
 import { connectToServer } from "../api/game.api";
 import { GameModel } from "../model/game.model";
 import { GameListModel } from "../model/game-list.model";
@@ -22,4 +22,5 @@ fetchGames().then(games => {
     crissCrossStore.dispatch(setGames(games));
     crissCrossStore.dispatch(ensureGameName());
 });
+subscribeGameListUpdates(gameItem => crissCrossStore.dispatch(updateGameList(gameItem)))
 connectToServer();

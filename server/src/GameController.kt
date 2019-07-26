@@ -35,7 +35,8 @@ class GameController(
 
     suspend fun createGame(gameName: String) {
         val game = this.gameStorage.createGame(gameName)
-        this.broadcast("games|create", gson.toJson(game))
+        this.sendToChannel("games|create", game.id.toString())
+        this.broadcast("games|updated", gson.toJson(game))
     }
 
     suspend fun loadGame(idString: String) {

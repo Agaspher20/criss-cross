@@ -6,7 +6,7 @@ export enum StoreActions {
     SetUser = "SET_USER",
     SetUserName = "SET_USER_NAME",
     SavingUserName = "SAVING_USER_NAME",
-    AddGame = "ADD_GAME",
+    UpdateGameList = "UPDATE_GAME_LIST",
     SavingGame = "SAVING_GAME",
     SetGames = "SET_GAMES",
     LoadingGame = "LOADING_GAME",
@@ -28,7 +28,7 @@ export interface SetUserNameAction extends Action<StoreActions.SetUserName> {
 
 export interface SavingUserNameAction extends Action<StoreActions.SavingUserName> {}
 
-export interface AddGameAction extends Action<StoreActions.AddGame> {
+export interface UpdateGameListAction extends Action<StoreActions.UpdateGameList> {
     readonly game: GameItem;
 }
 
@@ -76,8 +76,8 @@ export function savingUserName(): SavingUserNameAction {
     return { type: StoreActions.SavingUserName };
 }
 
-export function addGame(game: GameItem): AddGameAction {
-    return { type: StoreActions.AddGame, game };
+export function updateGameList(game: GameItem): UpdateGameListAction {
+    return { type: StoreActions.UpdateGameList, game };
 }
 
 export function setGames(games: ReadonlyArray<GameItem>): SetGamesAction {

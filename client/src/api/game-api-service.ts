@@ -10,12 +10,13 @@ enum Channels {
 }
 
 type GameMoveCallback = (move: GameMove) => void;
+type GameUpdatedCallback = (game: GameItem) => void;
 
 const gameListeners: {
     [key: number]: ChannelCallback | undefined
 } = {};
 
-function createGameListener (
+function createGameMoveListener (
     gameId: number,
     callback: GameMoveCallback
 ): ChannelCallback {
@@ -40,10 +41,17 @@ function setGameListener(gameId: number, listener: ChannelCallback): void {
     gameListeners[gameId] = listener;
 }
 
-export function subscribeGame(gameId: number, callback: GameMoveCallback): void {
-    const listener = createGameListener(gameId, callback);
+export function subscribeGameMoves(gameId: number, callback: GameMoveCallback): void {
+    const listener = createGameMoveListener(gameId, callback);
     setGameListener(gameId, listener);
     listenChannel(`${Channels.Game}|move`, listener);
+}
+
+export function subscribeGameListUpdates(callback: GameUpdatedCallback): void {
+    listenChannel(`${Channels.Games}|updated`, data => {
+        const parsedGame: GameItem = JSON.parse(data);
+        callback(parsedGame);
+    });
 }
 
 export function unsubscribeGame(gameId: number): void {
@@ -65,9 +73,9 @@ export async function fetchParameters(): Promise<GameParameters> {
     return JSON.parse(paramsString);
 }
 
-export async function submitGame(name: string): Promise<GameItem> {
-    const gameString = await requestResponse(`${Channels.Games}|create`, name);
-    return JSON.parse(gameString);
+export async function submitGame(name: string): Promise<number> {
+    const gameIdString = await requestResponse(`${Channels.Games}|create`, name);
+    return parseInt(gameIdString, 10);
 }
 
 export async function fetchGames(): Promise<ReadonlyArray<GameItem>> {
