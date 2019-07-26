@@ -13,7 +13,9 @@ class GameStorage {
     private val gameDetailsDictionary = ConcurrentHashMap<Int, StoredGameDetails>()
     private val gamesMovesSubscriptionsDictionary = ConcurrentHashMap<Int, ConcurrentHashMap<WebSocketSession, WebSocketSession>>()
     private val webSocketToGameDictionary = ConcurrentHashMap<WebSocketSession, Int>()
+    private val participants = ArrayList<WebSocketSession>()
     private val gameListLock = ReentrantReadWriteLock(false)
+    private val participantsLock = ReentrantReadWriteLock(false)
 
     fun setUserName(userId: String, userName: String) {
         usersDictionary[userId] = userName
@@ -21,6 +23,36 @@ class GameStorage {
 
     fun getUser(userId: String): User {
         return User(userId, usersDictionary[userId])
+    }
+
+    fun registerUser(session: WebSocketSession) {
+        participantsLock.writeLock().lock()
+
+        try {
+            this.participants.add(session)
+        } finally {
+            participantsLock.writeLock().unlock()
+        }
+    }
+
+    fun unregisterUser(session: WebSocketSession) {
+        participantsLock.writeLock().lock()
+
+        try {
+            this.participants.remove(session)
+        } finally {
+            participantsLock.writeLock().unlock()
+        }
+    }
+
+    fun getAllWebSockets(): List<WebSocketSession> {
+        participantsLock.readLock().lock()
+
+        try {
+            return this.participants.toList()
+        } finally {
+            participantsLock.readLock().unlock()
+        }
     }
 
     fun getAllGames(): List<Game> {

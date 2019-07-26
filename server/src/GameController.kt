@@ -15,15 +15,16 @@ class GameController(
     private val gson = Gson()
 
     suspend fun initializeSession() {
+        this.gameStorage.registerUser(this.wsSession)
         val user = this.gameStorage.getUser(this.userSession.id)
 
         this.sendToChannel("user", gson.toJson(user))
-
         this.sendToChannel("init", this.gson.toJson(this.gameParameters))
         this.sendToChannel("games|list", gson.toJson(gameStorage.getAllGames()))
     }
 
     fun disposeSession() {
+        this.gameStorage.unregisterUser(this.wsSession)
         this.gameStorage.memberLeft(this.wsSession)
     }
 
@@ -34,7 +35,7 @@ class GameController(
 
     suspend fun createGame(gameName: String) {
         val game = this.gameStorage.createGame(gameName)
-        this.sendToChannel("games|create", game.id.toString())
+        this.broadcast("games|create", game.id.toString())
     }
 
     suspend fun loadGame(idString: String) {
@@ -92,6 +93,19 @@ class GameController(
     }
 
     private suspend fun sendToChannel(channelName: String, payload: String = "") {
-        this.wsSession.send(Frame.Text("$channelName|$payload"))
+        this.send(this.wsSession, channelName, payload)
+    }
+
+    private suspend fun broadcast(channelName: String, payload: String = "") {
+        val participants = this.gameStorage.getAllWebSockets()
+        println("Received participants ${participants.count()}")
+        participants.forEach { socket ->
+            println("Sent to channel \"$channelName\"")
+            this.send(socket, channelName, payload)
+        }
+    }
+
+    private suspend fun send(socket: WebSocketSession, channelName: String, payload: String = "") {
+        socket.send(Frame.Text("$channelName|$payload"))
     }
 }
