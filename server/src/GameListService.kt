@@ -95,7 +95,7 @@ class GameListService(private val storage: GameStorage) {
     private fun mapToGameItem(game: Game) = GameItem(
         game.id,
         game.name,
-        game.participants.values.toList().sum(),
+        game.participants.values.size,
         game.creationTime,
         game.lastUpdate)
 }
