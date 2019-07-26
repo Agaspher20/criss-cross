@@ -1,5 +1,5 @@
 import { Action } from "redux";
-import { GameModel, GameParameters, GameMove } from "../../model/game.model";
+import { GameModel, GameMove } from "../../model/game.model";
 import {
     StoreActions,
     MoveGameAction,
@@ -34,6 +34,8 @@ export function currentGame(
             return loadingGame(state, action as LoadingGameAction);
         case StoreActions.SetGame:
             return setGame(state, action as SetGameAction);
+        case StoreActions.SetDefaultGame:
+            return setDefaultGame();
         case StoreActions.SetGameNotFound:
             return setGameNotFound(state);
         case StoreActions.SetGameParameters:
@@ -128,6 +130,10 @@ function revertMove(
         winnerSymbol: undefined,
         stepsCount: game.stepsCount - 1,
     }
+}
+
+function setDefaultGame(): GameModel {
+    return defaultGame;
 }
 
 function mustRevertPendingMove(move: GameMove, pendingMove: GameMove): boolean {

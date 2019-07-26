@@ -1,7 +1,7 @@
 import { Action } from "redux";
 import { StoreActions, UpdateGameListAction, SetGamesAction } from "../actions";
 import { GameListModel } from "../../model/game-list.model";
-import { GameItem, GameModel } from "../../model/game.model";
+import { GameItem } from "../../model/game.model";
 
 export const defaultGameList: GameListModel = {
     games: [],

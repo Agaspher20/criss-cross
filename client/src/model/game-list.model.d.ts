@@ -1,8 +1,8 @@
 import { GameItem } from "./game.model";
 
 export interface GameListModel {
-    games: ReadonlyArray<GameItem>;
-    idsSet: Set<string>;
-    savingGame: boolean;
-    loadingGames: boolean;
+    readonly games: ReadonlyArray<GameItem>;
+    readonly idsSet: Set<string>;
+    readonly savingGame: boolean;
+    readonly loadingGames: boolean;
 }

@@ -83,9 +83,5 @@ fun Application.module() {
                 gameController.disposeSession()
             }
         }
-
-        get("/json/gson") {
-            call.respond(mapOf("hello" to "world"))
-        }
     }
 }
