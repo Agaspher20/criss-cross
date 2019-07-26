@@ -96,5 +96,6 @@ class GameListService(private val storage: GameStorage) {
         game.id,
         game.name,
         game.participants.values.toList().sum(),
+        game.creationTime,
         game.lastUpdate)
 }

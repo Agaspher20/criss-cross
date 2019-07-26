@@ -19,10 +19,11 @@ class GameController(
     suspend fun initializeSession() {
         this.gameStorage.registerUser(this.wsSession)
         val user = this.gameStorage.getUser(this.userSession.id)
+        val allGames = this.gameListService.getAllGames().toList().sortedByDescending { g -> g.creationTime }
 
         this.sendToChannel("user", gson.toJson(user))
         this.sendToChannel("init", this.gson.toJson(this.gameParameters))
-        this.sendToChannel("games|list", gson.toJson(this.gameListService.getAllGames()))
+        this.sendToChannel("games|list", gson.toJson(allGames))
     }
 
     suspend fun disposeSession() {

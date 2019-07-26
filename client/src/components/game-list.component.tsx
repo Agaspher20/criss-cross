@@ -21,11 +21,20 @@ export class GameListComponent extends React.Component<GameListModel> {
     }
 
     private renderGameItem({ id, name, participantsCount, lastUpdate }: GameItem): React.ReactElement {
-        const updateDate = new Date(lastUpdate);
         return (<li key={id}>
             <p><Link to={`/game/${id}`}>{name}</Link></p>
             <p>Participants count: {participantsCount}</p>
-            <p>Last move: {updateDate.toLocaleDateString()}&nbsp;{updateDate.toLocaleTimeString()}</p>
+            { this.renderLastUpdate(lastUpdate) }
+            <hr/>
         </li>);
+    }
+
+    private renderLastUpdate(lastUpdate?: number): React.ReactElement | null {
+        if (lastUpdate) {
+            const updateDate = new Date(lastUpdate);
+            return (<p>Last move: {updateDate.toLocaleDateString()}&nbsp;{updateDate.toLocaleTimeString()}</p>)
+        } else {
+            return (null);
+        }
     }
 }
