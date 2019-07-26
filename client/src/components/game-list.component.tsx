@@ -20,10 +20,12 @@ export class GameListComponent extends React.Component<GameListModel> {
         return <ul>{ (this.props.games || []).map(game => this.renderGameItem(game)) }</ul>;
     }
 
-    private renderGameItem({ id, name, participantsCount }: GameItem): React.ReactElement {
+    private renderGameItem({ id, name, participantsCount, lastUpdate }: GameItem): React.ReactElement {
+        const updateDate = new Date(lastUpdate);
         return (<li key={id}>
             <p><Link to={`/game/${id}`}>{name}</Link></p>
             <p>Participants count: {participantsCount}</p>
+            <p>Last move: {updateDate.toLocaleDateString()}&nbsp;{updateDate.toLocaleTimeString()}</p>
         </li>);
     }
 }

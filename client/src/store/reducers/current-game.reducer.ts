@@ -20,6 +20,7 @@ export const defaultGame: GameModel = {
     sideSize: 10,
     symbolsToWin: 5,
     participantsCount: 0,
+    lastUpdate: new Date().getTime()
 }
 
 export function currentGame(

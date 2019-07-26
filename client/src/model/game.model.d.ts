@@ -22,6 +22,7 @@ export interface GameItem {
     readonly id: string;
     readonly name: string;
     readonly participantsCount: number;
+    readonly lastUpdate: number;
 }
 
 export interface GameParameters {

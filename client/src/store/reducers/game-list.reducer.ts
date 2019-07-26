@@ -1,7 +1,7 @@
 import { Action } from "redux";
 import { StoreActions, UpdateGameListAction, SetGamesAction } from "../actions";
 import { GameListModel } from "../../model/game-list.model";
-import { GameItem } from "../../model/game.model";
+import { GameItem, GameModel } from "../../model/game.model";
 
 export const defaultGameList: GameListModel = {
     games: [],
@@ -29,17 +29,20 @@ function updateGameList(
     { game }: UpdateGameListAction
 ): GameListModel {
     let games: ReadonlyArray<GameItem>;
+    let idsSet: Set<string>;
 
     if (state.idsSet.has(game.id)) {
         games = state.games.map(gm => gm.id === game.id ? game : gm);
+        idsSet = state.idsSet;
     } else {
         games = [game, ...state.games];
-        state.idsSet.add(game.id);
+        idsSet = new Set(games.map(game => game.id));
     }
 
     return {
         ...state,
-        games
+        games,
+        idsSet
     };
 }
 
@@ -50,6 +53,11 @@ function setGames(
     return {
         ...state,
         loadingGames: false,
-        games
+        games,
+        idsSet: createIdsSet(games)
     };
+}
+
+function createIdsSet(games: ReadonlyArray<GameItem>): Set<string> {
+    return new Set(games.map(g => g.id));
 }
