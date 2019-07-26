@@ -44,7 +44,6 @@ export function subscribeGame(gameId: number, callback: GameMoveCallback): void 
     const listener = createGameListener(gameId, callback);
     setGameListener(gameId, listener);
     listenChannel(`${Channels.Game}|move`, listener);
-    sendData(`${Channels.Game}|subscribe`, gameId.toString());
 }
 
 export function unsubscribeGame(gameId: number): void {
@@ -72,7 +71,7 @@ export async function submitGame(name: string): Promise<number> {
 }
 
 export async function fetchGames(): Promise<ReadonlyArray<GameItem>> {
-    const gamesString = await listenFirst(Channels.Games);
+    const gamesString = await listenFirst(`${Channels.Games}|list`);
     return JSON.parse(gamesString);
 }
 

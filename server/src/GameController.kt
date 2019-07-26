@@ -19,9 +19,8 @@ class GameController(
 
         this.sendToChannel("user", gson.toJson(user))
 
-        val gamesJson = gson.toJson(gameStorage.getAllGames().toList())
         this.sendToChannel("init", this.gson.toJson(this.gameParameters))
-        this.sendToChannel("games", gamesJson)
+        this.sendToChannel("games|list", gson.toJson(gameStorage.getAllGames()))
     }
 
     fun disposeSession() {
@@ -61,6 +60,7 @@ class GameController(
                 this.gson.toJson(game)
             }
             this.sendToChannel("game|load", gameText)
+            this.gameStorage.subscribeGame(id, this.wsSession)
         } catch (exc: NumberFormatException) {
             this.sendToChannel("game|load")
         }
@@ -79,15 +79,6 @@ class GameController(
             }
         } catch (exc: JsonSyntaxException) {
             println("Game move parsing failed")
-        }
-    }
-
-    fun subscribeToGame(gameIdString: String) {
-        try {
-            val gameId = gameIdString.toInt()
-            gameStorage.subscribeGame(gameId, this.wsSession)
-        } catch (exc: NumberFormatException) {
-            println("Game id parsing failed on subscribe")
         }
     }
 
