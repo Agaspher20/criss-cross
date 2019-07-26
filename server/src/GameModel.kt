@@ -3,9 +3,11 @@ package com.crissCrossServer
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReadWriteLock
 
-data class Game(val id: String, val name: String, val participantsCount: Int)
+data class GameItem(val id: String, val name: String, val participantsCount: Int)
 
-data class GameUpdate(val participantsDelta: Int)
+data class Game(val id: String, val name: String, val participants: MutableMap<String, Int>)
+
+data class GameUpdate(val userId: String?, val delta: Int)
 
 data class GameParameters(val symbolsToWin: Int, val sideSize: Int)
 
