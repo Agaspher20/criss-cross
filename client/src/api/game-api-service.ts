@@ -65,9 +65,9 @@ export async function fetchParameters(): Promise<GameParameters> {
     return JSON.parse(paramsString);
 }
 
-export async function submitGame(name: string): Promise<number> {
-    const id = await requestResponse(`${Channels.Games}|create`, name);
-    return parseInt(id, 10);
+export async function submitGame(name: string): Promise<GameItem> {
+    const gameString = await requestResponse(`${Channels.Games}|create`, name);
+    return JSON.parse(gameString);
 }
 
 export async function fetchGames(): Promise<ReadonlyArray<GameItem>> {

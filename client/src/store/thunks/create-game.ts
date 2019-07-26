@@ -6,9 +6,9 @@ export function createGame(dispatch: Dispatch): (name: string) => Promise<void> 
     return async (name: string) => {
         dispatch(savingGame(true));
 
-        const id = await submitGame(name);
+        const savedGame = await submitGame(name);
 
-        dispatch(addGame({ id, name }));
+        dispatch(addGame(savedGame));
         dispatch(savingGame(false));
     };
 }

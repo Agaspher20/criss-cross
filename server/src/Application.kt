@@ -22,7 +22,7 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 @Suppress("unused") // Referenced in application.conf
 fun Application.module() {
     val gameStorage = GameStorage()
-    val gameParameters = GameParameters(3, 4)
+    val gameParameters = GameParameters(5, 10)
 
     install(Sessions) {
         cookie<UserSession>("SESSION") {
