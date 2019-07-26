@@ -76,7 +76,7 @@ class GameController(
                 subscribers.forEach { session ->
                     session.send(Frame.Text("game|move|${this.gson.toJson(approvedMove)}"))
                 }
-                this.gameListService.onGameMove(move.gameId)
+                this.broadcastGameUpdate(this.gameListService.onGameMove(move.gameId))
             }
         } catch (exc: JsonSyntaxException) {
             println("Game move parsing failed")
