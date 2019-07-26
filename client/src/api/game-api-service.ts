@@ -13,11 +13,11 @@ type GameMoveCallback = (move: GameMove) => void;
 type GameUpdatedCallback = (game: GameItem) => void;
 
 const gameListeners: {
-    [key: number]: ChannelCallback | undefined
+    [key: string]: ChannelCallback | undefined
 } = {};
 
 function createGameMoveListener (
-    gameId: number,
+    gameId: string,
     callback: GameMoveCallback
 ): ChannelCallback {
     return data => {
@@ -28,7 +28,7 @@ function createGameMoveListener (
     };
 }
 
-function stopGameListener(gameId: number) {
+function stopGameListener(gameId: string) {
     const listener = gameListeners[gameId];
     if (listener) {
         stopListenChannel(Channels.Game, listener);
@@ -36,12 +36,12 @@ function stopGameListener(gameId: number) {
     }
 }
 
-function setGameListener(gameId: number, listener: ChannelCallback): void {
+function setGameListener(gameId: string, listener: ChannelCallback): void {
     stopGameListener(gameId);
     gameListeners[gameId] = listener;
 }
 
-export function subscribeGameMoves(gameId: number, callback: GameMoveCallback): void {
+export function subscribeGameMoves(gameId: string, callback: GameMoveCallback): void {
     const listener = createGameMoveListener(gameId, callback);
     setGameListener(gameId, listener);
     listenChannel(`${Channels.Game}|move`, listener);
@@ -54,7 +54,7 @@ export function subscribeGameListUpdates(callback: GameUpdatedCallback): void {
     });
 }
 
-export function unsubscribeGame(gameId: number): void {
+export function unsubscribeGame(gameId: string): void {
     stopGameListener(gameId);
     sendData(`${Channels.Game}|unsubscribe`, gameId.toString());
 }
@@ -73,9 +73,9 @@ export async function fetchParameters(): Promise<GameParameters> {
     return JSON.parse(paramsString);
 }
 
-export async function submitGame(name: string): Promise<number> {
+export async function submitGame(name: string): Promise<string> {
     const gameIdString = await requestResponse(`${Channels.Games}|create`, name);
-    return parseInt(gameIdString, 10);
+    return gameIdString;
 }
 
 export async function fetchGames(): Promise<ReadonlyArray<GameItem>> {
@@ -83,8 +83,8 @@ export async function fetchGames(): Promise<ReadonlyArray<GameItem>> {
     return JSON.parse(gamesString);
 }
 
-export async function fetchGame(id: number): Promise<GameDtoModel> {
-    const gameString = await requestResponse(`${Channels.Game}|load`, id.toString());
+export async function fetchGame(id: string): Promise<GameDtoModel> {
+    const gameString = await requestResponse(`${Channels.Game}|load`, id);
 
     if (!gameString) {
         throw new GameNotFoundError();

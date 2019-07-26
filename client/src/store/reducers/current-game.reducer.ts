@@ -13,7 +13,7 @@ export const defaultGame: GameModel = {
     cells: [],
     exists: false,
     loading: false,
-    id: -1,
+    id: "",
     name: "",
     nextSymbol: "X",
     stepsCount: 0,

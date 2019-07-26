@@ -19,7 +19,7 @@ export interface GameDtoModel {
 }
 
 export interface GameItem {
-    readonly id: number;
+    readonly id: string;
     readonly name: string;
 }
 
@@ -29,7 +29,7 @@ export interface GameParameters {
 }
 
 export interface GameMove extends StoredGameMove {
-    readonly gameId: number;
+    readonly gameId: string;
 }
 
 export interface StoredGameMove {

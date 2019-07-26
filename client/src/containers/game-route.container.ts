@@ -9,11 +9,10 @@ function mapStateToProps(
     { games }: CrissCrossState,
     ownProps: GameRouteProps
 ): GameRouteProps {
-    const id = parseInt(ownProps.match.params.id, 10);
+    const id = ownProps.match.params.id;
     const game = games.games.find(game => game.id === id);
     return {
         ...ownProps,
-        id,
         name: game && game.name
     };
 }

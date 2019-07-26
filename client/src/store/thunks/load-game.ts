@@ -4,8 +4,8 @@ import { fetchGame, GameNotFoundError, subscribeGameMoves, unsubscribeGame } fro
 
 export function loadGame(
     dispatch: Dispatch
-): (id: number, name?: string) => Promise<void> {
-    return async (id: number, name?: string) => {
+): (id: string, name?: string) => Promise<void> {
+    return async (id: string, name?: string) => {
         dispatch(loadingGame(id, name));
         try {
             subscribeGameMoves(id, move => {

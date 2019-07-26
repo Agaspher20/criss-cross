@@ -38,7 +38,7 @@ function ensureGameName(state: CrissCrossState): CrissCrossState {
     const currentGame = state.currentGame;
     const games = state.games.games;
 
-    if (games.length && !currentGame.name && currentGame.id > -1) {
+    if (games.length && !currentGame.name && !!currentGame.id) {
         const gameItem = games.find(game => game.id === currentGame.id);
         if (gameItem) {
             const ensuredGame = {

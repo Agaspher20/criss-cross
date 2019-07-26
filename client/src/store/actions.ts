@@ -41,7 +41,7 @@ export interface SetGamesAction extends Action<StoreActions.SetGames> {
 }
 
 export interface LoadingGameAction extends Action<StoreActions.LoadingGame> {
-    readonly id: number;
+    readonly id: string;
     readonly name?: string;
 }
 
@@ -88,7 +88,7 @@ export function savingGame(saving: boolean): SavingGameAction {
     return { type: StoreActions.SavingGame, saving };
 }
 
-export function loadingGame(id: number, name?: string): LoadingGameAction {
+export function loadingGame(id: string, name?: string): LoadingGameAction {
     return { type: StoreActions.LoadingGame, id, name };
 }
 

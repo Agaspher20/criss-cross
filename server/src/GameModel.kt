@@ -3,7 +3,7 @@ package com.crissCrossServer
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReadWriteLock
 
-data class Game(val id: Int, val name: String)
+data class Game(val id: String, val name: String)
 
 data class GameParameters(val symbolsToWin: Int, val sideSize: Int)
 
@@ -23,7 +23,7 @@ data class StoredGameDetails(
     var winnerName: String? = null)
 
 data class GameMove(
-    val gameId: Int,
+    val gameId: String,
     val userId: String,
     val cellIndex: Int,
     val symbol: String,

@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import io.ktor.http.cio.websocket.Frame
 import io.ktor.http.cio.websocket.WebSocketSession
+import io.ktor.util.KtorExperimentalAPI
 
 class GameController(
     private val gameParameters: GameParameters,
@@ -33,39 +34,35 @@ class GameController(
         this.sendToChannel("user", userName)
     }
 
+    @KtorExperimentalAPI
     suspend fun createGame(gameName: String) {
         val game = this.gameStorage.createGame(gameName)
-        this.sendToChannel("games|create", game.id.toString())
+        this.sendToChannel("games|create", game.id)
         this.broadcast("games|updated", gson.toJson(game))
     }
 
-    suspend fun loadGame(idString: String) {
-        try {
-            val id = idString.toInt()
-            val storedGame = this.gameStorage.getGameDetails(id)
+    suspend fun loadGame(id: String) {
+        val storedGame = this.gameStorage.getGameDetails(id)
 
-            val gameText = if (storedGame == null ) {
-                ""
-            } else {
-                val game: GameDetails
-                storedGame.lock.readLock().lock()
-                try {
-                    game = GameDetails(
-                        storedGame.nextSymbol,
-                        storedGame.moves.values.toList(),
-                        storedGame.lastMoveId,
-                        storedGame.winnerSymbol,
-                        storedGame.winnerName)
-                } finally {
-                    storedGame.lock.readLock().unlock()
-                }
-                this.gson.toJson(game)
+        val gameText = if (storedGame == null ) {
+            ""
+        } else {
+            val game: GameDetails
+            storedGame.lock.readLock().lock()
+            try {
+                game = GameDetails(
+                    storedGame.nextSymbol,
+                    storedGame.moves.values.toList(),
+                    storedGame.lastMoveId,
+                    storedGame.winnerSymbol,
+                    storedGame.winnerName)
+            } finally {
+                storedGame.lock.readLock().unlock()
             }
-            this.sendToChannel("game|load", gameText)
-            this.gameStorage.subscribeGame(id, this.wsSession)
-        } catch (exc: NumberFormatException) {
-            this.sendToChannel("game|load")
+            this.gson.toJson(game)
         }
+        this.sendToChannel("game|load", gameText)
+        this.gameStorage.subscribeGame(id, this.wsSession)
     }
 
     suspend fun gameMove(moveText: String) {
@@ -84,14 +81,7 @@ class GameController(
         }
     }
 
-    fun unsubscribeFromGame(gameIdString: String) {
-        try {
-            val gameId = gameIdString.toInt()
-            gameStorage.unsubscribeGame(gameId, this.wsSession)
-        } catch (exc: NumberFormatException) {
-            println("Game id parsing failed on unsubscribe")
-        }
-    }
+    fun unsubscribeFromGame(gameId: String) = gameStorage.unsubscribeGame(gameId, this.wsSession)
 
     private suspend fun sendToChannel(channelName: String, payload: String = "") {
         this.send(this.wsSession, channelName, payload)

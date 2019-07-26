@@ -28,10 +28,10 @@ function updateGameList(
     state: GameListModel,
     { game }: UpdateGameListAction
 ): GameListModel {
-    let games: GameItem[];
+    let games: ReadonlyArray<GameItem>;
 
     if (state.idsSet.has(game.id)) {
-        games = [...state.games];
+        games = state.games;
     } else {
         games = [game, ...state.games];
         state.idsSet.add(game.id);
@@ -39,7 +39,7 @@ function updateGameList(
 
     return {
         ...state,
-        games: [game, ...state.games]
+        games
     };
 }
 

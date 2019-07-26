@@ -1,5 +1,6 @@
 package com.crissCrossServer
 
+import io.ktor.util.KtorExperimentalAPI
 import java.lang.Exception
 import kotlin.arrayOf
 
@@ -25,6 +26,7 @@ class FrameHandler(
 class GameRouter(
         private val gameController: GameController) {
 
+    @KtorExperimentalAPI
     private val handlers = arrayOf(
         FrameHandler(
             "user",
@@ -48,6 +50,7 @@ class GameRouter(
         )
     )
 
+    @KtorExperimentalAPI
     suspend fun routeFrame(frameText: String) {
         try {
             handleFrame(frameText, this.handlers)
