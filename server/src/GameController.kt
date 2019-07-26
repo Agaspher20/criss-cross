@@ -35,7 +35,7 @@ class GameController(
 
     suspend fun createGame(gameName: String) {
         val game = this.gameStorage.createGame(gameName)
-        this.sendToChannel("games", game.id.toString())
+        this.sendToChannel("games|create", game.id.toString())
     }
 
     suspend fun loadGame(idString: String) {
@@ -60,9 +60,9 @@ class GameController(
                 }
                 this.gson.toJson(game)
             }
-            this.sendToChannel("game", gameText)
+            this.sendToChannel("game|load", gameText)
         } catch (exc: NumberFormatException) {
-            this.sendToChannel("game")
+            this.sendToChannel("game|load")
         }
     }
 

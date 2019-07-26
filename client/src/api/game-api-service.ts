@@ -20,11 +20,9 @@ function createGameListener (
     callback: GameMoveCallback
 ): ChannelCallback {
     return data => {
-        if (data.startsWith("move|")) {
-            const parsedMove: GameMove = JSON.parse(data.replace("move|", ""));
-            if (parsedMove.gameId === gameId) {
-                callback(parsedMove);
-            }
+        const parsedMove: GameMove = JSON.parse(data);
+        if (parsedMove.gameId === gameId) {
+            callback(parsedMove);
         }
     };
 }
@@ -45,13 +43,13 @@ function setGameListener(gameId: number, listener: ChannelCallback): void {
 export function subscribeGame(gameId: number, callback: GameMoveCallback): void {
     const listener = createGameListener(gameId, callback);
     setGameListener(gameId, listener);
-    listenChannel(Channels.Game, listener);
-    sendData(Channels.Game, `subscribe|${gameId}`);
+    listenChannel(`${Channels.Game}|move`, listener);
+    sendData(`${Channels.Game}|subscribe`, gameId.toString());
 }
 
 export function unsubscribeGame(gameId: number): void {
     stopGameListener(gameId);
-    sendData(Channels.Game, `unsubscribe|${gameId}`);
+    sendData(`${Channels.Game}|unsubscribe`, gameId.toString());
 }
 
 export function submitUserName(name: string): Promise<string> {
@@ -69,7 +67,7 @@ export async function fetchParameters(): Promise<GameParameters> {
 }
 
 export async function submitGame(name: string): Promise<number> {
-    const id = await requestResponse(Channels.Games, `create|${name}`);
+    const id = await requestResponse(`${Channels.Games}|create`, name);
     return parseInt(id, 10);
 }
 
@@ -79,7 +77,7 @@ export async function fetchGames(): Promise<ReadonlyArray<GameItem>> {
 }
 
 export async function fetchGame(id: number): Promise<GameDtoModel> {
-    const gameString = await requestResponse(Channels.Game, `load|${id.toString()}`);
+    const gameString = await requestResponse(`${Channels.Game}|load`, id.toString());
 
     if (!gameString) {
         throw new GameNotFoundError();
@@ -88,7 +86,7 @@ export async function fetchGame(id: number): Promise<GameDtoModel> {
 }
 
 export function submitMove(move: GameMove): Promise<void> {
-    return sendData(Channels.Game, `move|${JSON.stringify(move)}`);
+    return sendData(`${Channels.Game}|move`, JSON.stringify(move));
 }
 
 export class GameNotFoundError extends Error {}

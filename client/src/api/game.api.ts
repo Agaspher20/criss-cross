@@ -49,7 +49,7 @@ function notifyListeners<T>(data: T, listeners: Set<ConnectionCallback<T>>): voi
 
 function onMessage(event: MessageEvent): void {
     const stringData: string = event.data;
-    const delimiterIndex = stringData.indexOf("|");
+    const delimiterIndex = stringData.lastIndexOf("|");
 
     if (delimiterIndex > 0) {
         const channel = stringData.substring(0, delimiterIndex);
