@@ -1,7 +1,7 @@
 package com.crissCrossServer
 
-import java.lang.Exception
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.concurrent.write
 
 class GameService(private val parameters: GameParameters, private val storage: GameStorage) {
     fun moveGame(move: GameMove): Pair<GameMove?, String?> {
@@ -11,8 +11,7 @@ class GameService(private val parameters: GameParameters, private val storage: G
         }
 
         val storedMove = StoredGameMove(move.userId, move.cellIndex, move.symbol)
-        gameDetails.lock.writeLock().lock()
-        try {
+        return gameDetails.lock.write {
             if (!canSetSymbol(move, gameDetails)) {
                 return Pair(null, null)
             }
@@ -32,10 +31,6 @@ class GameService(private val parameters: GameParameters, private val storage: G
             }
 
             return Pair(move, gameDetails.winnerName)
-        } catch (exc: Exception) {
-            return Pair(null, null)
-        } finally {
-            gameDetails.lock.writeLock().unlock()
         }
     }
 

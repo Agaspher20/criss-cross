@@ -1,7 +1,7 @@
 package com.crissCrossServer
 
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.locks.ReadWriteLock
+import java.util.concurrent.locks.ReentrantReadWriteLock
 
 data class GameItem(
     val id: String,
@@ -31,7 +31,7 @@ data class GameDetails(
 data class StoredGameDetails(
     var nextSymbol: String,
     val moves: ConcurrentHashMap<Int, StoredGameMove>,
-    val lock: ReadWriteLock,
+    val lock: ReentrantReadWriteLock,
     var lastMoveId: String? = null,
     var winnerSymbol: String? = null,
     var winnerName: String? = null)

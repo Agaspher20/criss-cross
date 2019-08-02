@@ -5,6 +5,8 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.collections.ArrayList
+import kotlin.concurrent.read
+import kotlin.concurrent.write
 
 class GameStorage {
     private val usersDictionary = ConcurrentHashMap<String, String>()
@@ -24,34 +26,16 @@ class GameStorage {
         return User(userId, usersDictionary[userId])
     }
 
-    fun registerUser(session: WebSocketSession) {
-        participantsLock.writeLock().lock()
-
-        try {
-            this.participants.add(session)
-        } finally {
-            participantsLock.writeLock().unlock()
-        }
+    fun registerUser(session: WebSocketSession) = participantsLock.write {
+        this.participants.add(session)
     }
 
-    fun unregisterUser(session: WebSocketSession) {
-        participantsLock.writeLock().lock()
-
-        try {
-            this.participants.remove(session)
-        } finally {
-            participantsLock.writeLock().unlock()
-        }
+    fun unregisterUser(session: WebSocketSession) = participantsLock.write {
+        this.participants.remove(session)
     }
 
-    fun getAllWebSockets(): List<WebSocketSession> {
-        participantsLock.readLock().lock()
-
-        try {
-            return this.participants.toList()
-        } finally {
-            participantsLock.readLock().unlock()
-        }
+    fun getAllWebSockets(): List<WebSocketSession> = participantsLock.read {
+        this.participants.toList()
     }
 
     fun getGames(): Enumeration<Game> = gamesDictionary.elements()

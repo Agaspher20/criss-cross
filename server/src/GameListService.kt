@@ -6,33 +6,24 @@ import io.ktor.util.generateNonce
 import java.util.*
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.collections.HashMap
+import kotlin.concurrent.read
+import kotlin.concurrent.write
 
 class GameListService(private val storage: GameStorage) {
     private val gameListLock = ReentrantReadWriteLock(false)
 
-    fun getAllGames(): List<GameItem> {
-        gameListLock.readLock().lock()
-
-        return (try {
-            this.storage.getGames()
-                .toList()
-                .map { game -> mapToGameItem(game) }
-        } finally {
-            gameListLock.readLock().unlock()
-        })
+    fun getAllGames(): List<GameItem> = gameListLock.read {
+        this.storage.getGames()
+            .toList()
+            .map { game -> mapToGameItem(game) }
     }
 
     @KtorExperimentalAPI
-    fun createGame(name: String): GameItem {
-        gameListLock.writeLock().lock()
-        try {
-            val game = Game(generateNonce(), name, HashMap(), Date().time)
-            this.storage.putGame(game)
+    fun createGame(name: String): GameItem = gameListLock.write {
+        val game = Game(generateNonce(), name, HashMap(), Date().time)
+        this.storage.putGame(game)
 
-            return mapToGameItem(game)
-        } finally {
-            gameListLock.writeLock().unlock()
-        }
+        return mapToGameItem(game)
     }
 
     fun enterGame(gameId: String, userId: String, session: WebSocketSession): GameItem {
@@ -58,8 +49,7 @@ class GameListService(private val storage: GameStorage) {
     private fun updateGame(gameId: String, update: GameUpdate): GameItem {
         val game = this.getGame(gameId)
 
-        this.gameListLock.writeLock().lock()
-        return try {
+        return this.gameListLock.write {
             when {
                 (update.userId != null && update.delta != 0) -> {
                     updateGameParticipants(game, update.userId, update.delta)
@@ -69,8 +59,6 @@ class GameListService(private val storage: GameStorage) {
                 }
             }
             mapToGameItem(game)
-        } finally {
-            this.gameListLock.writeLock().unlock()
         }
     }
 
@@ -83,13 +71,8 @@ class GameListService(private val storage: GameStorage) {
         }
     }
 
-    private fun getGame(gameId: String): Game {
-        this.gameListLock.readLock().lock()
-        return try {
-            this.storage.getGame(gameId)
-        } finally {
-            this.gameListLock.readLock().unlock()
-        }
+    private fun getGame(gameId: String): Game = this.gameListLock.read {
+        this.storage.getGame(gameId)
     }
 
     private fun mapToGameItem(game: Game) = GameItem(
