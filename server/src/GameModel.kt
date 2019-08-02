@@ -15,26 +15,26 @@ data class Game(
     val name: String,
     val participants: MutableMap<String, Int>,
     val creationTime: Long,
-    var lastUpdate: Long? = null)
+    val lastUpdate: Long? = null)
 
 data class GameUpdate(val userId: String?, val delta: Int, val updateTime: Long? = null)
 
 data class GameParameters(val symbolsToWin: Int, val sideSize: Int)
 
 data class GameDetails(
-    var nextSymbol: String,
+    val nextSymbol: String,
     val moves: List<StoredGameMove>,
-    var lastMoveId: String? = null,
-    var winnerSymbol: String? = null,
-    var winnerName: String? = null)
+    val lastMoveId: String? = null,
+    val winnerSymbol: String? = null,
+    val winnerName: String? = null)
 
 data class StoredGameDetails(
-    var nextSymbol: String,
+    val nextSymbol: String,
     val moves: ConcurrentHashMap<Int, StoredGameMove>,
     val lock: ReentrantReadWriteLock,
-    var lastMoveId: String? = null,
-    var winnerSymbol: String? = null,
-    var winnerName: String? = null)
+    val lastMoveId: String? = null,
+    val winnerSymbol: String? = null,
+    val winnerName: String? = null)
 
 data class GameMove(
     val gameId: String,

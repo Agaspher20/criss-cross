@@ -50,15 +50,19 @@ class GameListService(private val storage: GameStorage) {
         val game = this.getGame(gameId)
 
         return this.gameListLock.write {
-            when {
+            val resultGame = when {
                 (update.userId != null && update.delta != 0) -> {
                     updateGameParticipants(game, update.userId, update.delta)
+                    game
                 }
                 (update.updateTime != null) -> {
-                    game.lastUpdate = update.updateTime
+                    val updatedGame = game.copy(lastUpdate = update.updateTime)
+                    this.storage.putGame(updatedGame)
+                    updatedGame
                 }
+                else -> game
             }
-            mapToGameItem(game)
+            mapToGameItem(resultGame)
         }
     }
 

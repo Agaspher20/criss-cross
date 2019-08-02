@@ -58,6 +58,12 @@ class GameStorage {
         })
     }
 
+    fun putGameDetails(id: String, details: StoredGameDetails) {
+        if (gamesDictionary.containsKey(id)) {
+            gameDetailsDictionary[id] = details
+        }
+    }
+
     fun saveGameSubscription(gameId: String, session: WebSocketSession) {
         val subscribers = gamesMovesSubscriptionsDictionary.getOrPut(gameId, { ConcurrentHashMap() })
         subscribers[session] = session
