@@ -1,6 +1,7 @@
 package com.crissCrossServer
 
 import io.ktor.http.cio.websocket.WebSocketSession
+import io.ktor.util.generateNonce
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantReadWriteLock
@@ -44,7 +45,13 @@ class GameStorage {
 
     fun getGame(gameId: String): Game? = gamesDictionary.getOrElse(gameId, { null })
 
-    fun createGame(gameId: String, name: String) = gamesDictionary.getOrPut(gameId, { Game(gameId, name, Date().time) })
+    fun createGame(name: String): Game {
+        val gameId = generateNonce()
+        val game = Game(gameId, name, Date().time)
+        gamesDictionary[gameId] = game
+
+        return game
+    }
 
     fun getGameDetails(game: Game): StoredGameDetails = gameDetailsDictionary.getOrPut(game, {
         StoredGameDetails(

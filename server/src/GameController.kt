@@ -46,12 +46,11 @@ class GameController(
     suspend fun loadGame(id: String) {
         val game = this.gameService.loadGame(id)
 
-        val gameText = if (game == null) {
+        this.sendToChannel("game|load", if (game == null) {
             ""
         } else {
             this.gson.toJson(game)
-        }
-        this.sendToChannel("game|load", gameText)
+        })
         this.broadcastGameUpdate(this.gameListService.enterGame(id, this.userSession.id, this.wsSession))
     }
 

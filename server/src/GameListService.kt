@@ -2,7 +2,6 @@ package com.crissCrossServer
 
 import io.ktor.http.cio.websocket.WebSocketSession
 import io.ktor.util.KtorExperimentalAPI
-import io.ktor.util.generateNonce
 import java.util.*
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.collections.HashMap
@@ -21,7 +20,7 @@ class GameListService(private val storage: GameStorage) {
 
     @KtorExperimentalAPI
     fun createGame(name: String): GameItem = gamesListLock.write {
-        val game = this.storage.createGame(generateNonce(), name)
+        val game = this.storage.createGame(name)
 
         return this.storage.getGameLock(game).read {
             mapToGameItem(game, this.storage.getGameDetails(game))
