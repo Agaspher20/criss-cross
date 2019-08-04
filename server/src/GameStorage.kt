@@ -1,6 +1,7 @@
 package com.crissCrossServer
 
 import io.ktor.http.cio.websocket.WebSocketSession
+import io.ktor.util.KtorExperimentalAPI
 import io.ktor.util.generateNonce
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -45,6 +46,7 @@ class GameStorage {
 
     fun getGame(gameId: String): Game? = gamesDictionary.getOrElse(gameId, { null })
 
+    @KtorExperimentalAPI
     fun createGame(name: String): Game {
         val gameId = generateNonce()
         val game = Game(gameId, name, Date().time)
