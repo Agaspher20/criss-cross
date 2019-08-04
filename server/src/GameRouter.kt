@@ -1,6 +1,7 @@
 package com.crissCrossServer
 
 import io.ktor.util.KtorExperimentalAPI
+import org.slf4j.Logger
 import java.lang.Exception
 import kotlin.arrayOf
 
@@ -24,7 +25,9 @@ class FrameHandler(
 }
 
 class GameRouter(
-        private val gameController: GameController) {
+        private val gameController: GameController,
+        private val logger: Logger
+) {
 
     @KtorExperimentalAPI
     private val handlers = arrayOf(
@@ -55,7 +58,7 @@ class GameRouter(
         try {
             handleFrame(frameText, this.handlers)
         } catch (exc: FrameRoutingException) {
-            println("[ERROR] ${exc.message}")
+            logger.error(exc.message)
         }
     }
 }

@@ -5,6 +5,7 @@ import com.google.gson.JsonSyntaxException
 import io.ktor.http.cio.websocket.Frame
 import io.ktor.http.cio.websocket.WebSocketSession
 import io.ktor.util.KtorExperimentalAPI
+import org.slf4j.Logger
 
 class GameController(
     private val gameParameters: GameParameters,
@@ -12,7 +13,8 @@ class GameController(
     private val gameService: GameService,
     private val gameListService: GameListService,
     private val userSession: UserSession,
-    private val wsSession: WebSocketSession
+    private val wsSession: WebSocketSession,
+    private val logger: Logger
 ) {
     private val gson = Gson()
 
@@ -67,7 +69,7 @@ class GameController(
                 this.broadcastGameUpdate(this.gameListService.onGameMove(move.gameId))
             }
         } catch (exc: JsonSyntaxException) {
-            println("Game move parsing failed")
+            this.logger.error("Game move parsing failed")
         }
     }
 
@@ -86,9 +88,9 @@ class GameController(
 
     private suspend fun broadcast(channelName: String, payload: String = "") {
         val participants = this.gameStorage.getAllWebSockets()
-        println("Received participants ${participants.count()}")
+        this.logger.info("Received participants ${participants.count()}")
         participants.forEach { socket ->
-            println("Sent to channel \"$channelName\"")
+            this.logger.info("Sent to channel \"$channelName\"")
             this.send(socket, channelName, payload)
         }
     }

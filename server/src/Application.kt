@@ -8,7 +8,6 @@ import io.ktor.features.*
 import io.ktor.websocket.*
 import io.ktor.http.cio.websocket.*
 import java.time.*
-import io.ktor.gson.*
 import io.ktor.util.KtorExperimentalAPI
 import io.ktor.util.generateNonce
 import kotlinx.coroutines.ObsoleteCoroutinesApi
@@ -40,10 +39,6 @@ fun Application.module() {
         masking = false
     }
 
-    install(ContentNegotiation) {
-        gson {
-        }
-    }
     intercept(ApplicationCallPipeline.Features) {
         if (call.sessions.get<UserSession>() == null) {
             call.sessions.set(UserSession(generateNonce()))
@@ -68,8 +63,9 @@ fun Application.module() {
                 GameService(gameParameters, gameStorage),
                 GameListService(gameStorage),
                 session,
-                this)
-            val gameRouter = GameRouter(gameController)
+                this,
+                call.application.environment.log)
+            val gameRouter = GameRouter(gameController, call.application.environment.log)
 
             gameController.initializeSession()
             try {
@@ -81,6 +77,7 @@ fun Application.module() {
             } finally {
                 gameController.disposeSession()
             }
+            call.application.environment.log.info("Application initialized")
         }
     }
 }
