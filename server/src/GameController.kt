@@ -5,7 +5,6 @@ import com.google.gson.JsonSyntaxException
 import io.ktor.http.cio.websocket.Frame
 import io.ktor.http.cio.websocket.WebSocketSession
 import io.ktor.util.KtorExperimentalAPI
-import kotlin.concurrent.read
 
 class GameController(
     private val gameParameters: GameParameters,
@@ -45,21 +44,12 @@ class GameController(
     }
 
     suspend fun loadGame(id: String) {
-        val gameItem = this.gameStorage.getGame(id)
+        val game = this.gameService.loadGame(id)
 
-        val gameText = if (gameItem == null) {
+        val gameText = if (game == null) {
             ""
         } else {
-            val storedGame = this.gameStorage.getGameDetails(gameItem)
-            val gameDetails: GameDetails = storedGame.lock.read {
-                GameDetails(
-                    storedGame.nextSymbol,
-                    storedGame.moves.values.toList(),
-                    storedGame.lastMoveId,
-                    storedGame.winnerSymbol,
-                    storedGame.winnerName)
-            }
-            this.gson.toJson(gameDetails)
+            this.gson.toJson(game)
         }
         this.sendToChannel("game|load", gameText)
         this.broadcastGameUpdate(this.gameListService.enterGame(id, this.userSession.id, this.wsSession))

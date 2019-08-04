@@ -1,9 +1,28 @@
 package com.crissCrossServer
 
-import java.util.concurrent.ConcurrentHashMap
+import kotlin.concurrent.read
 import kotlin.concurrent.write
 
 class GameService(private val parameters: GameParameters, private val storage: GameStorage) {
+    fun loadGame(id: String): GameDetails? {
+        val game = this.storage.getGame(id)
+
+        return if (game == null) {
+            null
+        } else {
+            val gameLock = this.storage.getGameLock(game)
+            gameLock.read {
+                val storedGame = this.storage.getGameDetails(game)
+                GameDetails(
+                    storedGame.nextSymbol,
+                    storedGame.moves.values.toList(),
+                    storedGame.lastMoveId,
+                    storedGame.winnerSymbol,
+                    storedGame.winnerName)
+            }
+        }
+    }
+
     fun moveGame(move: GameMove): Pair<GameMove?, String?> {
         val game = this.storage.getGame(move.gameId)
 
@@ -11,29 +30,29 @@ class GameService(private val parameters: GameParameters, private val storage: G
             return Pair(null, null)
         }
 
-        val gameDetails = this.storage.getGameDetails(game)
-        if (!canSetSymbol(move, gameDetails)) {
-            return Pair(null, null)
-        }
-
+        val gameLock = this.storage.getGameLock(game)
         val storedMove = StoredGameMove(move.userId, move.cellIndex, move.symbol)
-        return gameDetails.lock.write {
+
+        return gameLock.write {
+            val gameDetails = this.storage.getGameDetails(game)
             if (!canSetSymbol(move, gameDetails)) {
                 return Pair(null, null)
             }
 
-                gameDetails.moves[storedMove.cellIndex] = storedMove
+            val nextMoves = HashMap(gameDetails.moves)
+            nextMoves[storedMove.cellIndex] = storedMove
             val winnerSymbol = calculateWinner(
                 move.symbol,
-                gameDetails.moves,
+                nextMoves,
                 move.cellIndex,
                 parameters
             )
-            val resultDetails = gameDetails.copy(
-                nextSymbol = if (move.symbol == "X") "O" else "X",
-                lastMoveId = move.userId,
-                winnerSymbol = winnerSymbol,
-                winnerName = if (winnerSymbol != null) this.storage.getUser(move.userId).name else null
+            val resultDetails = StoredGameDetails(
+                if (move.symbol == "X") "O" else "X",
+                nextMoves,
+                move.userId,
+                winnerSymbol,
+                if (winnerSymbol != null) this.storage.getUser(move.userId).name else null
             )
 
             this.storage.putGameDetails(move.gameId, resultDetails)
@@ -82,7 +101,7 @@ private val moveLaws: Array<Array<(Position) -> Position>> = arrayOf(
 
 private fun calculateWinner(
     symbol: String,
-    cells: ConcurrentHashMap<Int, StoredGameMove>,
+    cells: HashMap<Int, StoredGameMove>,
     startIndex: Int,
     parameters: GameParameters
 ): String? {
@@ -112,7 +131,7 @@ private fun calculateSide(
     symbol: String,
     move: (Position) -> Position,
     position: Position,
-    cells: ConcurrentHashMap<Int, StoredGameMove>,
+    cells: HashMap<Int, StoredGameMove>,
     gameParameters: GameParameters
 ): Int {
     val (symbolsToWin, sideSize) = gameParameters

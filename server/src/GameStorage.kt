@@ -13,6 +13,7 @@ class GameStorage {
 
     private val gamesDictionary = ConcurrentHashMap<String, Game>()
     private val gameDetailsDictionary = ConcurrentHashMap<String, StoredGameDetails>()
+    private val gameLocks = ConcurrentHashMap<String, ReentrantReadWriteLock>()
     private val gamesMovesSubscriptionsDictionary = ConcurrentHashMap<String, ConcurrentHashMap<WebSocketSession, WebSocketSession>>()
     private val webSocketToGameDictionary = ConcurrentHashMap<WebSocketSession, String>()
     private val participants = ArrayList<WebSocketSession>()
@@ -49,9 +50,12 @@ class GameStorage {
     fun getGameDetails(game: Game): StoredGameDetails = gameDetailsDictionary.getOrPut(game.id, {
         StoredGameDetails(
             "X",
-            ConcurrentHashMap(),
-            ReentrantReadWriteLock(false)
+            HashMap()
         )
+    })
+
+    fun getGameLock(game: Game): ReentrantReadWriteLock = gameLocks.getOrPut(game.id, {
+        ReentrantReadWriteLock()
     })
 
     fun putGameDetails(id: String, details: StoredGameDetails) {
