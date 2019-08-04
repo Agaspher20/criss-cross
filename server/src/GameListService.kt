@@ -26,13 +26,13 @@ class GameListService(private val storage: GameStorage) {
         return mapToGameItem(game)
     }
 
-    fun enterGame(gameId: String, userId: String, session: WebSocketSession): GameItem {
+    fun enterGame(gameId: String, userId: String, session: WebSocketSession): GameItem? {
         this.storage.saveGameSubscription(gameId, session)
 
         return updateGame(gameId, GameUpdate(userId, 1))
     }
 
-    fun leaveGame(gameId: String, userId: String, session: WebSocketSession): GameItem {
+    fun leaveGame(gameId: String, userId: String, session: WebSocketSession): GameItem? {
         this.storage.removeGameSubscriptionById(gameId, session)
 
         return updateGame(gameId, GameUpdate(userId, -1))
@@ -44,10 +44,14 @@ class GameListService(private val storage: GameStorage) {
         return if (gameId == null ) null else updateGame(gameId, GameUpdate(userId, -1))
     }
 
-    fun onGameMove(gameId: String): GameItem = updateGame(gameId, GameUpdate(null, 0, Date().time))
+    fun onGameMove(gameId: String): GameItem? = updateGame(gameId, GameUpdate(null, 0, Date().time))
 
-    private fun updateGame(gameId: String, update: GameUpdate): GameItem {
+    private fun updateGame(gameId: String, update: GameUpdate): GameItem? {
         val game = this.getGame(gameId)
+
+        if (game == null) {
+            return null
+        }
 
         return this.gameListLock.write {
             val resultGame = when {
@@ -75,7 +79,7 @@ class GameListService(private val storage: GameStorage) {
         }
     }
 
-    private fun getGame(gameId: String): Game = this.gameListLock.read {
+    private fun getGame(gameId: String): Game? = this.gameListLock.read {
         this.storage.getGame(gameId)
     }
 

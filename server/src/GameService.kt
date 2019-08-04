@@ -5,8 +5,14 @@ import kotlin.concurrent.write
 
 class GameService(private val parameters: GameParameters, private val storage: GameStorage) {
     fun moveGame(move: GameMove): Pair<GameMove?, String?> {
-        val gameDetails = this.storage.getGameDetails(move.gameId)
-        if (gameDetails == null || !canSetSymbol(move, gameDetails)) {
+        val game = this.storage.getGame(move.gameId)
+
+        if (game == null) {
+            return Pair(null, null)
+        }
+
+        val gameDetails = this.storage.getGameDetails(game)
+        if (!canSetSymbol(move, gameDetails)) {
             return Pair(null, null)
         }
 
@@ -16,7 +22,7 @@ class GameService(private val parameters: GameParameters, private val storage: G
                 return Pair(null, null)
             }
 
-            gameDetails.moves[storedMove.cellIndex] = storedMove
+                gameDetails.moves[storedMove.cellIndex] = storedMove
             val winnerSymbol = calculateWinner(
                 move.symbol,
                 gameDetails.moves,

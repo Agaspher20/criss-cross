@@ -40,23 +40,19 @@ class GameStorage {
 
     fun getGames(): Enumeration<Game> = gamesDictionary.elements()
 
-    fun getGame(gameId: String): Game = gamesDictionary.getValue(gameId)
+    fun getGame(gameId: String): Game? = gamesDictionary.getOrElse(gameId, { null })
 
     fun putGame(game: Game) {
         gamesDictionary[game.id] = game
     }
 
-    fun getGameDetails(id: String): StoredGameDetails? = if (!gamesDictionary.containsKey(id)) {
-        null
-    } else {
-        gameDetailsDictionary.getOrPut(id, {
-            StoredGameDetails(
-                "X",
-                ConcurrentHashMap(),
-                ReentrantReadWriteLock(false)
-            )
-        })
-    }
+    fun getGameDetails(game: Game): StoredGameDetails = gameDetailsDictionary.getOrPut(game.id, {
+        StoredGameDetails(
+            "X",
+            ConcurrentHashMap(),
+            ReentrantReadWriteLock(false)
+        )
+    })
 
     fun putGameDetails(id: String, details: StoredGameDetails) {
         if (gamesDictionary.containsKey(id)) {

@@ -45,12 +45,13 @@ class GameController(
     }
 
     suspend fun loadGame(id: String) {
-        val storedGame = this.gameStorage.getGameDetails(id)
+        val gameItem = this.gameStorage.getGame(id)
 
-        val gameText = if (storedGame == null ) {
+        val gameText = if (gameItem == null) {
             ""
         } else {
-            val game: GameDetails = storedGame.lock.read {
+            val storedGame = this.gameStorage.getGameDetails(gameItem)
+            val gameDetails: GameDetails = storedGame.lock.read {
                 GameDetails(
                     storedGame.nextSymbol,
                     storedGame.moves.values.toList(),
@@ -58,7 +59,7 @@ class GameController(
                     storedGame.winnerSymbol,
                     storedGame.winnerName)
             }
-            this.gson.toJson(game)
+            this.gson.toJson(gameDetails)
         }
         this.sendToChannel("game|load", gameText)
         this.broadcastGameUpdate(this.gameListService.enterGame(id, this.userSession.id, this.wsSession))
