@@ -1,7 +1,6 @@
 package com.crissCrossServer
 
 import io.ktor.http.cio.websocket.WebSocketSession
-import io.ktor.util.generateNonce
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantReadWriteLock
@@ -14,8 +13,8 @@ class GameStorage {
     private val usersDictionary = ConcurrentHashMap<String, String>()
 
     private val gamesDictionary = ConcurrentHashMap<String, Game>()
-    private val gameDetailsDictionary = ConcurrentHashMap<String, StoredGameDetails>()
-    private val gameLocks = ConcurrentHashMap<String, ReentrantReadWriteLock>()
+    private val gameDetailsDictionary = ConcurrentHashMap<Game, StoredGameDetails>()
+    private val gameLocks = ConcurrentHashMap<Game, ReentrantReadWriteLock>()
     private val gamesMovesSubscriptionsDictionary = ConcurrentHashMap<String, ConcurrentHashMap<WebSocketSession, WebSocketSession>>()
     private val webSocketToGameDictionary = ConcurrentHashMap<WebSocketSession, String>()
     private val participants = ArrayList<WebSocketSession>()
@@ -47,7 +46,7 @@ class GameStorage {
 
     fun createGame(gameId: String, name: String) = gamesDictionary.getOrPut(gameId, { Game(gameId, name, Date().time) })
 
-    fun getGameDetails(game: Game): StoredGameDetails = gameDetailsDictionary.getOrPut(game.id, {
+    fun getGameDetails(game: Game): StoredGameDetails = gameDetailsDictionary.getOrPut(game, {
         StoredGameDetails(
             "X",
             HashMap(),
@@ -55,10 +54,10 @@ class GameStorage {
         )
     })
 
-    fun getGameLock(game: Game): ReentrantReadWriteLock = gameLocks.getOrPut(game.id, { ReentrantReadWriteLock() })
+    fun getGameLock(game: Game): ReentrantReadWriteLock = gameLocks.getOrPut(game, { ReentrantReadWriteLock() })
 
     fun putGameDetails(game: Game, details: StoredGameDetails) {
-        gameDetailsDictionary[game.id] = details
+        gameDetailsDictionary[game] = details
     }
 
     fun saveGameSubscription(gameId: String, session: WebSocketSession) {
