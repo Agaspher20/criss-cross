@@ -24,7 +24,6 @@ yarn-error.log*
 
 **/.gradle
 **/.vscode
-**/.idea
 **/out
 /build
 *.iml
