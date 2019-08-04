@@ -10,8 +10,7 @@ class GameService(private val parameters: GameParameters, private val storage: G
         return if (game == null) {
             null
         } else {
-            val gameLock = this.storage.getGameLock(game)
-            gameLock.read {
+            this.storage.getGameLock(game).read {
                 val storedGame = this.storage.getGameDetails(game)
                 GameDetails(
                     storedGame.nextSymbol,
@@ -30,10 +29,8 @@ class GameService(private val parameters: GameParameters, private val storage: G
             return Pair(null, null)
         }
 
-        val gameLock = this.storage.getGameLock(game)
         val storedMove = StoredGameMove(move.userId, move.cellIndex, move.symbol)
-
-        return gameLock.write {
+        return this.storage.getGameLock(game).write {
             val gameDetails = this.storage.getGameDetails(game)
             if (!canSetSymbol(move, gameDetails)) {
                 return Pair(null, null)

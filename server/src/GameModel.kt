@@ -10,8 +10,7 @@ data class GameItem(
 data class Game(
     val id: String,
     val name: String,
-    val creationTime: Long,
-    val lastUpdate: Long? = null)
+    val creationTime: Long)
 
 data class GameUpdate(val userId: String?, val delta: Int, val updateTime: Long? = null)
 
@@ -30,7 +29,8 @@ data class StoredGameDetails(
     val participants: Map<String, Int>,
     val lastMoveId: String? = null,
     val winnerSymbol: String? = null,
-    val winnerName: String? = null)
+    val winnerName: String? = null,
+    val lastUpdate: Long? = null)
 
 data class GameMove(
     val gameId: String,

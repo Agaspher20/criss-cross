@@ -10,20 +10,22 @@ import kotlin.concurrent.read
 import kotlin.concurrent.write
 
 class GameListService(private val storage: GameStorage) {
-    private val gameListLock = ReentrantReadWriteLock(false)
+    private val gamesListLock = ReentrantReadWriteLock(false)
 
-    fun getAllGames(): List<GameItem> = gameListLock.read {
-        this.storage.getGames()
-            .toList()
-            .map { game -> mapToGameItem(game) }
+    fun getAllGames(): List<GameItem> {
+        val allGames =  gamesListLock.read { this.storage.getGames().toList() }
+        return allGames.map { game -> this.storage.getGameLock(game).read {
+            mapToGameItem(game, this.storage.getGameDetails(game))
+        } }
     }
 
     @KtorExperimentalAPI
-    fun createGame(name: String): GameItem = gameListLock.write {
-        val game = Game(generateNonce(), name, Date().time)
-        this.storage.putGame(game)
+    fun createGame(name: String): GameItem = gamesListLock.write {
+        val game = this.storage.createGame(generateNonce(), name)
 
-        return mapToGameItem(game)
+        return this.storage.getGameLock(game).read {
+            mapToGameItem(game, this.storage.getGameDetails(game))
+        }
     }
 
     fun enterGame(gameId: String, userId: String, session: WebSocketSession): GameItem? {
@@ -47,54 +49,51 @@ class GameListService(private val storage: GameStorage) {
     fun onGameMove(gameId: String): GameItem? = updateGame(gameId, GameUpdate(null, 0, Date().time))
 
     private fun updateGame(gameId: String, update: GameUpdate): GameItem? {
-        val game = this.getGame(gameId)
+        val game = this.storage.getGame(gameId)
 
         if (game == null) {
             return null
         }
 
-        return this.gameListLock.write {
-            val resultGame = when {
+        val writtenDetails = this.storage.getGameLock(game).write {
+            val details = this.storage.getGameDetails(game)
+            val updatedDetails = when {
                 (update.userId != null && update.delta != 0) -> {
-                    updateGameParticipants(game, update.userId, update.delta)
-                    game
+                    details.copy(
+                        participants = updateGameParticipants(details.participants, update.userId, update.delta)
+                    )
                 }
                 (update.updateTime != null) -> {
-                    val updatedGame = game.copy(lastUpdate = update.updateTime)
-                    this.storage.putGame(updatedGame)
-                    updatedGame
+                    details.copy(lastUpdate = update.updateTime)
                 }
-                else -> game
+                else -> details
             }
-            mapToGameItem(resultGame)
+            this.storage.putGameDetails(game, updatedDetails)
+            updatedDetails
         }
+
+        return mapToGameItem(game, writtenDetails)
     }
 
-    private fun updateGameParticipants(game: Game, userId: String, delta: Int) = this.storage.getGameLock(game).write {
-        val details = this.storage.getGameDetails(game)
-        val count = details.participants.getOrDefault(userId, 0) + delta
-        val nextParticipants = HashMap(details.participants)
+    private fun updateGameParticipants(
+        participants: Map<String, Int>,
+        userId: String,
+        delta: Int): Map<String, Int> {
+        val count = participants.getOrDefault(userId, 0) + delta
+        val nextParticipants = HashMap(participants)
         if (count == 0) {
             nextParticipants.remove(userId)
         } else {
             nextParticipants[userId] = count
         }
-        this.storage.putGameDetails(game, details.copy(
-            participants = nextParticipants
-        ))
+
+        return nextParticipants
     }
 
-    private fun getGame(gameId: String): Game? = this.gameListLock.read {
-        this.storage.getGame(gameId)
-    }
-
-    private fun mapToGameItem(game: Game) = this.storage.getGameLock(game).read {
-        val details = this.storage.getGameDetails(game)
-        GameItem(
-            game.id,
-            game.name,
-            details.participants.values.size,
-            game.creationTime,
-            game.lastUpdate)
-    }
+    private fun mapToGameItem(game: Game, details: StoredGameDetails): GameItem = GameItem(
+        game.id,
+        game.name,
+        details.participants.values.size,
+        game.creationTime,
+        details.lastUpdate)
 }
