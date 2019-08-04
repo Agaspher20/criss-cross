@@ -10,7 +10,6 @@ data class GameItem(
 data class Game(
     val id: String,
     val name: String,
-    val participants: MutableMap<String, Int>,
     val creationTime: Long,
     val lastUpdate: Long? = null)
 
@@ -27,7 +26,8 @@ data class GameDetails(
 
 data class StoredGameDetails(
     val nextSymbol: String,
-    val moves: HashMap<Int, StoredGameMove>,
+    val moves: Map<Int, StoredGameMove>,
+    val participants: Map<String, Int>,
     val lastMoveId: String? = null,
     val winnerSymbol: String? = null,
     val winnerName: String? = null)

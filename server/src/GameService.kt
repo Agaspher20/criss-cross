@@ -47,15 +47,15 @@ class GameService(private val parameters: GameParameters, private val storage: G
                 move.cellIndex,
                 parameters
             )
-            val resultDetails = StoredGameDetails(
-                if (move.symbol == "X") "O" else "X",
-                nextMoves,
-                move.userId,
-                winnerSymbol,
-                if (winnerSymbol != null) this.storage.getUser(move.userId).name else null
+            val resultDetails = gameDetails.copy(
+                nextSymbol = if (move.symbol == "X") "O" else "X",
+                moves = nextMoves,
+                lastMoveId = move.userId,
+                winnerSymbol = winnerSymbol,
+                winnerName = if (winnerSymbol != null) this.storage.getUser(move.userId).name else null
             )
 
-            this.storage.putGameDetails(move.gameId, resultDetails)
+            this.storage.putGameDetails(game, resultDetails)
 
             return Pair(move, resultDetails.winnerName)
         }

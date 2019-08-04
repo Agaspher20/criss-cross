@@ -5,6 +5,7 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 import kotlin.concurrent.read
 import kotlin.concurrent.write
 
@@ -50,6 +51,7 @@ class GameStorage {
     fun getGameDetails(game: Game): StoredGameDetails = gameDetailsDictionary.getOrPut(game.id, {
         StoredGameDetails(
             "X",
+            HashMap(),
             HashMap()
         )
     })
@@ -58,10 +60,8 @@ class GameStorage {
         ReentrantReadWriteLock()
     })
 
-    fun putGameDetails(id: String, details: StoredGameDetails) {
-        if (gamesDictionary.containsKey(id)) {
-            gameDetailsDictionary[id] = details
-        }
+    fun putGameDetails(game: Game, details: StoredGameDetails) {
+        gameDetailsDictionary[game.id] = details
     }
 
     fun saveGameSubscription(gameId: String, session: WebSocketSession) {

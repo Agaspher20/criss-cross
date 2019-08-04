@@ -20,7 +20,7 @@ class GameListService(private val storage: GameStorage) {
 
     @KtorExperimentalAPI
     fun createGame(name: String): GameItem = gameListLock.write {
-        val game = Game(generateNonce(), name, HashMap(), Date().time)
+        val game = Game(generateNonce(), name, Date().time)
         this.storage.putGame(game)
 
         return mapToGameItem(game)
@@ -70,23 +70,31 @@ class GameListService(private val storage: GameStorage) {
         }
     }
 
-    private fun updateGameParticipants(game: Game, userId: String, delta: Int) {
-        val count = game.participants.getOrDefault(userId, 0) + delta
+    private fun updateGameParticipants(game: Game, userId: String, delta: Int) = this.storage.getGameLock(game).write {
+        val details = this.storage.getGameDetails(game)
+        val count = details.participants.getOrDefault(userId, 0) + delta
+        val nextParticipants = HashMap(details.participants)
         if (count == 0) {
-            game.participants.remove(userId)
+            nextParticipants.remove(userId)
         } else {
-            game.participants[userId] = count
+            nextParticipants[userId] = count
         }
+        this.storage.putGameDetails(game, details.copy(
+            participants = nextParticipants
+        ))
     }
 
     private fun getGame(gameId: String): Game? = this.gameListLock.read {
         this.storage.getGame(gameId)
     }
 
-    private fun mapToGameItem(game: Game) = GameItem(
-        game.id,
-        game.name,
-        game.participants.values.size,
-        game.creationTime,
-        game.lastUpdate)
+    private fun mapToGameItem(game: Game) = this.storage.getGameLock(game).read {
+        val details = this.storage.getGameDetails(game)
+        GameItem(
+            game.id,
+            game.name,
+            details.participants.values.size,
+            game.creationTime,
+            game.lastUpdate)
+    }
 }
