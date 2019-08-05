@@ -39,3 +39,19 @@ dependencies {
     compile "io.ktor:ktor-gson:$ktor_version"
     testCompile "io.ktor:ktor-server-tests:$ktor_version"
 }
+
+task localClassesDeploy(type: Copy) {
+    dependsOn test
+    from './build/classes/kotlin/main'
+    into './out/production/classes'
+}
+
+task localResourcesDeploy(type: Copy) {
+    dependsOn localClassesDeploy
+    from './build/resources/main'
+    into './out/production/resources'
+}
+
+build {
+    dependsOn localResourcesDeploy
+}

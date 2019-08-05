@@ -1,0 +1,19 @@
+plugins {
+    id "com.github.node-gradle.node" version "2.0.0"
+}
+
+repositories {
+    jcenter()
+}
+
+version '0.0.1'
+
+yarn_build {
+    dependsOn yarn
+}
+
+task build(type: Copy) {
+    dependsOn yarn_build
+    from "./build"
+    into "../server/build/resources/main/static"
+}
